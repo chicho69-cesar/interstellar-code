@@ -1,17 +1,20 @@
 ---
-import '@/styles/global.css';
+import Navbar from "@/components/ui/Navbar.astro";
 import { SITE_INFO } from "@/constants/site-info";
+import "@/styles/global.css";
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  keywords?: string;
 }
 
 const {
-	title = SITE_INFO.title,
-	description = SITE_INFO.description,
-	image
+  title = SITE_INFO.title,
+  description = SITE_INFO.description,
+  image,
+  keywords = "",
 } = Astro.props;
 ---
 
@@ -21,35 +24,51 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="" />
     <meta name="generator" content={Astro.generator} />
 
-		<!-- Meta tags -->
-		<meta name="title" content={title} />
-		<meta name="description" content={description} />
+    <!-- Meta tags -->
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="author" content="Cesar Villalobos Olmos" />
+    <meta name="robots" content="index, follow" />
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-		<!-- Open Graph - Facebook -->
-		<meta name="og:title" content={title} />
-		<meta name="og:description" content={description} />
-		<meta name="og:url" content={Astro.url} />
-		<meta name="og:type" content="website" />
-		<meta name="og:image" content={image} />
+    <meta
+      name="keywords"
+      content={`Cesar, Programación, Desarrollo Web, Full-Stack Developer, Mobile App Developer, Web Developer, Front-End Developer, Back-End Developer, Java, JavaScript, React, React Native, TypeScript, C#, Spring, ASP.NET ${keywords}`}
+    />
 
-		<!-- Open Graph - Twitter -->
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:url" content={Astro.url} />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content={image} />
+    <!-- Open Graph - Facebook -->
+    <meta name="og:title" content={title} />
+    <meta name="og:description" content={description} />
+    <meta name="og:url" content={Astro.url} />
+    <meta name="og:type" content="website" />
+    {image && <meta name="og:image" content={image} />}
+
+    <!-- Open Graph - Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={Astro.url} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
 
     <title>
       {title}
     </title>
   </head>
 
-  <body>
-    <div>
-      <slot />
+  <body class="text-black dark:text-white">
+    <div
+      class="absolute top-0 z-[-2] h-screen w-screen bg-neutral-100 dark:bg-neutral-900 selection:bg-neutral-200 dark:selection:bg-neutral-700 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
+    >
     </div>
+
+    <main class="w-[90%] max-w-3xl mx-auto py-4">
+      <Navbar />
+      <slot />
+    </main>
   </body>
 </html>
 
