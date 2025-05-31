@@ -1,0 +1,150 @@
+---
+title: Guía de Flexbox
+description: Aprende como utilizar todo el poder que brinda flexbox en CSS para crear layouts increíbles.
+date: 2025-06-01
+tags: [CSS]
+sections: [
+  Propiedades del contenedor Flex,
+  Propiedades de los elementos Flex,
+]
+---
+
+# Guía completa de Flexbox
+
+Flexbox, abreviación de Flexible Box Layout, es un modelo de diseño de CSS que permite distribuir elementos de forma eficiente en un contenedor, incluso si su tamaño es dinámico o desconocido. Flexbox es utilizado comúnmente para crear layouts flexibles y responsivos, para alinear elementos horizontal y verticalmente, para distribuir elementos con espacios automáticos.
+
+Un contenedor flex es cualquier elemento con un `display: flex;` o con un `display: inline-flex;` Siendo los elementos flexibles son los elementos hijos directos del contenedor flexible.
+
+
+## Propiedades del contenedor Flex
+
+**1.- flex-direction**: Esta propiedad define la dirección en la cual se reparten los elementos dentro del contenedor, siendo a través del main axis, repartiendo los elementos en filas (row), o columnas (column).
+
+```css
+.contenedor {
+  flex-direction: row; /* Por defecto (horizontal) */
+  flex-direction: row-reverse; /* Invertido */
+  flex-direction: column; /* Vertical */
+  flex-direction: column-reverse; /* Vertical invertido */
+}
+```
+
+**2.- justify-content**: Esta propiedad nos ayuda a alinear los elementos hijos del contenedor flex a través del eje principal (main axis).
+
+```css
+.contenedor {
+  justify-content: flex-start; /* Inicio (por defecto) */
+  justify-content: flex-end; /* Final */
+  justify-content: center; /* Centro */
+  justify-content: space-between; /* Espaciado entre ítems */
+  justify-content: space-around; /* Espaciado con márgenes */
+  justify-content: space-evenly; /* Espaciado igual */
+}
+```
+
+**3.- align-items**: Esta propiedad nos ayuda a alinear los elementos hijos del contenedor flex a través del eje secundario (cross axis).
+
+```css
+.contenedor {
+  align-items: flex-start; /* Arriba */
+  align-items: flex-end; /* Abajo */
+  align-items: center; /* Centrado */
+  align-items: stretch; /* Estira al máximo (por defecto) */
+  align-items: baseline; /* Alinea según la línea base del texto */
+}
+```
+
+**4.- align-content**: Esta propiedad es parecida a align-items, solo que esta en lugar de alinear los elementos individuales, esta propiedad alinea múltiples filas en el eje secundario, cuando tenemos un `flex-wrap para que hay múltiples filas.
+
+```css
+.contenedor {
+  align-content: flex-start;
+  align-content: flex-end;
+  align-content: center;
+  align-content: space-between;
+  align-content: space-around;
+  align-content: space-evenly;
+}
+```
+
+**5.- flex-wrap**: Esta propiedad permite que los elementos se acomoden en varias filas en un contenedor si estos no caben dentro de el con su ancho o alto por defecto.
+
+```css
+.contenedor {
+  flex-wrap: nowrap; /* Una sola línea (por defecto) */
+  flex-wrap: wrap; /* Permite varias líneas */
+  flex-wrap: wrap-reverse; /* Varias líneas invertidas */
+}
+```
+
+**6.- flex-flow**: Esta simplemente es una propiedad que resume las dos propiedades `flex-direction` y la propiedad `flex-wrap`.
+
+```css
+.contenedor {
+	flex-flow: row nowrap;
+}
+```
+
+
+## Propiedades de los elementos Flex
+
+**1.- flex-grow**: Define cuanto crecerá un elemento en comparación con los demás, por ejemplo si tenemos un flex-grow de 2, el elemento que lo tenga tendrá un ancho de 100px cuando los demás tengan un ancho de 50px, y así sucesivamente.
+
+```css
+.item {
+  flex-grow: 1; /* Todos crecen igual */
+}
+
+.item-doble {
+  flex-grow: 2; /* Este crece el doble */
+}
+```
+
+**2.- flex-shrink**: Define cuanto se encogerá un elemento en comparación con los demás, por ejemplo si tenemos un flex-shrink de 2, el elemento que lo tenga tendrá un ancho de 100px cuando los demás tengan un ancho de 200px, y así sucesivamente.
+
+```css
+.item {
+  flex-shrink: 1; /* Todos pueden encoger */
+}
+
+.item-no-shrink {
+  flex-shrink: 0; /* No se encoge */
+}
+```
+
+**3.- flex-basis**: Esta propiedad define el tamaño inicial de los elementos antes de aplicar el flex-grow o flex-shrink, es decir, es similar a lo que seria un width o height inicial del elemento dependiendo la dirección del contenedor.
+
+```css
+.item {
+  flex-basis: 100px; /* Todos miden 100px */
+}
+```
+
+**4.- flex**: La propiedad flex es una abreviación de las tres propiedades anteriores, siendo el orden de uso `flex-grow`, `flex-shrink` y `flex-basis`.
+
+```css
+.item {
+  flex: 1; /* Equivalente a flex: 1 1 0% */
+  flex: 2 1 100px; /* Crece al doble, se encoge y mide 100px inicialmente */
+}
+```
+
+**5.- align-self**: Esta propiedad ajusta la alineación de un elemento de forma individual sin afectar a los demás.
+
+```css
+.item {
+  align-self: flex-start;
+  align-self: flex-end;
+  align-self: center;
+  align-self: stretch;
+  align-self: baseline;
+}
+```
+
+**6.- order**: Esta propiedad se utiliza para intercambiar el orden de los elementos, por ejemplo si usamos un order 3, el elemento que tenga este orden va a estar ubicado como el tercer elemento aunque sea el primero o el número 50.
+
+```css
+.item {
+	order: 50;
+}
+```
