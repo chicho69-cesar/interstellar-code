@@ -1,21 +1,41 @@
 ---
+import GitHubDarkIcon from "@/icons/socials/GitHubDark.astro";
+import GitHubLightIcon from "@/icons/socials/GitHubLight.astro";
+import XDarkIcon from "@/icons/socials/XDark.astro";
+import XLightIcon from "@/icons/socials/XLight.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 ---
 
-<header>
-  <h1>
-    Interstellar Code
-  </h1>
+<header class="w-full my-8 flex justify-between items-center gap-4 flex-row flex-nowrap">
+  <a href="/">
+    <h1 class="font-geist font-bold text-base text-neutral-900/90 dark:text-neutral-100/90 hover:opacity-90 transition">
+      Interstellar Code
+    </h1>
+  </a>
 
-  <ul>
+  <ul class="flex flex-row justify-end items-center gap-6">
     <li>
-      <a href="/">
-        <!--  -->
+      <a
+        href="https://x.com/chicho69_cesar"
+        class="hover:opacity-80 transition"
+        target="_blank"
+        rel="noopener;noreferrer"
+      >
+        <XDarkIcon id="x-dark" class="menu-icon size-5 transition-all" />
+        <XLightIcon id="x-light" class="menu-icon size-5 transition-all" />
       </a>
     </li>
-    
+
     <li>
-      <!--  -->
+      <a
+        href="https://github.com/chicho69-cesar"
+        class="hover:opacity-80 transition"
+        target="_blank"
+        rel="noopener;noreferrer"
+      >
+        <GitHubDarkIcon id="github-dark" class="menu-icon size-5 transition-all" />
+        <GitHubLightIcon id="github-light" class="menu-icon size-5 transition-all" />
+      </a>
     </li>
 
     <ThemeToggle />
