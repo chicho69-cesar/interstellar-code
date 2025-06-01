@@ -1,0 +1,41 @@
+---
+import Calendar from '@/icons/general/Calendar.astro';
+import { dateFormat } from '@/lib/formatter';
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  post: CollectionEntry<'blog'>
+}
+
+const { post } = Astro.props;
+const { data } = post;
+---
+
+<a
+  href={`/blog/${data.slug}`}
+  class="inline-block w-full p-4 border border-neutral-300/60 dark:border-neutral-700/60 rounded"
+>
+  <div class="w-full">
+    <h3 class="inline font-geist text-lg font-medium text-neutral-900/90 dark:text-neutral-100/90 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors border-b border-transparent hover:border-neutral-900 dark:hover:border-neutral-100 border-dotted">
+      {data.title}
+    </h3>
+  </div>
+
+  <p class="font-geist text-sm text-neutral-600 dark:text-neutral-400 mt-2">
+    {data.description}
+  </p>
+
+  <footer class="flex items-center justify-between mt-4">
+    <div class="flex justify-center items-end gap-1 p-1 rounded border border-neutral-300/60 dark:border-neutral-700/60">
+      <Calendar class="size-4" />
+
+      <p class="font-geist text-xs text-neutral-900 dark:text-neutral-100">
+        {dateFormat(data.date)}
+      </p>
+    </div>
+
+    <p class="font-geist text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+      Ver más...
+    </p>
+  </footer>
+</a>

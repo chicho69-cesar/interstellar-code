@@ -1,13 +1,25 @@
 ---
-import Layout from '@/layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import PostCard from '@/components/posts/PostCard.astro';
 
-const posts = await getCollection('blog');
-console.log(posts);
+const posts = (await getCollection('blog'))
+	.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+	.slice(0, 10);
 ---
 
 <Layout>
-	<h1 class="text-3xl font-bold text-center underline decoration-4 decoration-blue-500 font-geist">
-		Hola Mundo!!!
-	</h1>
+	<p class="font-geist text-base tracking-tight leading-6 text-neutral-900 dark:text-neutral-100 text-pretty my-12">
+		<span class="font-geist font-bold text-neutral-900/90 dark:text-neutral-100/90">¡Bienvenidos a Interstellar Code!</span> Aquí podrás encontrar consejos prácticos y guías sobre diversos temas, como tecnología, programación y desarrollo profesional. A través de este espacio, espero que encuentres ayuda e inspiración para tus proyectos y desafíos diarios. 
+	</p>
+
+	<h2 class="font-geist text-xl text-neutral-900/90 dark:text-neutral-100/90 font-semibold">
+		Posts Recientes
+	</h2>
+
+	<section class="grid grid-cols-1 gap-4 mt-6">
+		{posts.map((post) => (
+			<PostCard post={post} />
+		))}
+	</section>
 </Layout>
