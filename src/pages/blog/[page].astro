@@ -1,7 +1,62 @@
 ---
+import PostCard from "@/components/posts/PostCard.astro";
+import Layout from "@/layouts/Layout.astro";
 import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
 
-export const getStaticPaths = (() => {
-  return [];
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = (await getCollection('blog'))
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+  
+  return paginate(posts, { pageSize: 10 });
 }) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
 ---
+
+<Layout>
+	<p class="font-geist text-base tracking-tight leading-6 text-neutral-900 dark:text-neutral-100 text-pretty my-12">
+		<span class="font-geist font-bold text-neutral-900/90 dark:text-neutral-100/90">¡Bienvenidos a Interstellar Code!</span> Aquí podrás encontrar consejos prácticos y guías sobre diversos temas, como tecnología, programación y desarrollo profesional. A través de este espacio, espero que encuentres ayuda e inspiración para tus proyectos y desafíos diarios. 
+	</p>
+
+	<h2 class="font-geist text-xl text-neutral-900/90 dark:text-neutral-100/90 font-semibold">
+		Página {page.currentPage} de {page.lastPage}
+	</h2>
+
+	<section class="grid grid-cols-1 gap-4 mt-6">
+		{page.data.map((post) => (
+			<PostCard post={post} />
+		))}
+	</section>
+
+	<section aria-label="Controles" class="flex justify-center items-center gap-4 mt-8">
+    <a
+      href={page.url.prev}
+      class:list={{
+        disabled: !page.url.prev,
+      }}
+			class="font-geist text-sm text-neutral-900 dark:text-neutral-100 px-6 py-2 rounded-lg border border-neutral-300/60 dark:border-neutral-700/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200"
+    >
+			Anteriores
+    </a>
+
+    <a
+      href={page.url.next}
+      class:list={{
+        disabled: !page.url.next,
+      }}
+			class="font-geist text-sm text-neutral-900 dark:text-neutral-100 px-6 py-2 rounded-lg border border-neutral-300/60 dark:border-neutral-700/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200"
+    >
+			Siguientes
+    </a>
+  </section>
+
+	<br></br>
+</Layout>
+
+<style>
+	.disabled {
+		pointer-events: none;
+		opacity: 0.5;
+	}
+</style>
