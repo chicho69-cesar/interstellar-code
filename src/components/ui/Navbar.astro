@@ -13,31 +13,33 @@ import ThemeToggle from "./ThemeToggle.astro";
     </h1>
   </a>
 
-  <ul class="flex flex-row justify-end items-center gap-6">
+  <ul class="flex flex-row justify-end items-center space-x-2">
     <li>
       <a
         href="https://x.com/chicho69_cesar"
-        class="hover:opacity-80 transition"
+        class="transition flex justify-center items-center p-2 hover:bg-neutral-300 rounded dark:hover:bg-neutral-700"
         target="_blank"
-        rel="noopener;noreferrer"
+        rel="noopener noreferrer"
       >
-        <XDarkIcon id="x-dark" class="menu-icon size-5 transition-all" />
-        <XLightIcon id="x-light" class="menu-icon size-5 transition-all" />
+        <XDarkIcon id="x-dark" class="hidden dark:block size-5 transition-all" />
+        <XLightIcon id="x-light" class="block dark:hidden size-5 transition-all" />
       </a>
     </li>
 
     <li>
       <a
         href="https://github.com/chicho69-cesar"
-        class="hover:opacity-80 transition"
+        class="transition flex justify-center items-center p-2 hover:bg-neutral-300 rounded dark:hover:bg-neutral-700"
         target="_blank"
         rel="noopener;noreferrer"
       >
-        <GitHubDarkIcon id="github-dark" class="menu-icon size-5 transition-all" />
-        <GitHubLightIcon id="github-light" class="menu-icon size-5 transition-all" />
+        <GitHubDarkIcon id="github-dark" class="hidden dark:block size-5 transition-all" />
+        <GitHubLightIcon id="github-light" class="block dark:hidden size-5 transition-all" />
       </a>
     </li>
-
-    <ThemeToggle />
+    
+    <li>
+      <ThemeToggle />
+    </li>
   </ul>
 </header>
