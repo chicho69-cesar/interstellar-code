@@ -1,0 +1,71 @@
+---
+import Heading1 from "@/components/mdx/Heading1.astro";
+import Heading2 from "@/components/mdx/Heading2.astro";
+import Heading3 from "@/components/mdx/Heading3.astro";
+import Paragraph from "@/components/mdx/Paragraph.astro";
+import Layout from "@/layouts/Layout.astro";
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection("blog");
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const data = post.data;
+
+const { Content, headings } = await post.render();
+
+const components = {
+  h1: Heading1,
+  h2: Heading2,
+  h3: Heading3,
+  p: Paragraph,
+};
+---
+
+<Layout
+  title={data.title}
+  description={data.description || "Interstellar Code Blog"}
+  keywords={data.tags?.join(", ")}
+>
+  <ol class="mb-8 list-none flex flex-col gap-1">
+    {headings.map((heading: any, index: number) => (
+      <li>
+        <a href={`#${heading.slug}`}>
+          {heading.text}
+        </a>
+      </li>
+    ))}
+  </ol>
+
+  <Content components={components} />
+</Layout>
+
+<style is:global>
+  .astro-code {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .astro-code {
+    overflow-x: auto;
+  }
+  
+  .astro-code::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+    font-size: 0.65rem;
+    padding: 0.5rem;
+  }
+</style>
