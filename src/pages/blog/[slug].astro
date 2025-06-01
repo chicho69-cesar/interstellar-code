@@ -3,7 +3,9 @@ import Heading1 from "@/components/mdx/Heading1.astro";
 import Heading2 from "@/components/mdx/Heading2.astro";
 import Heading3 from "@/components/mdx/Heading3.astro";
 import Paragraph from "@/components/mdx/Paragraph.astro";
+import Calendar from "@/icons/general/Calendar.astro";
 import Layout from "@/layouts/Layout.astro";
+import { dateFormat } from "@/lib/formatter";
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 
@@ -34,15 +36,44 @@ const components = {
   description={data.description || "Interstellar Code Blog"}
   keywords={data.tags?.join(", ")}
 >
-  <ol class="mb-8 list-none flex flex-col gap-1">
-    {headings.map((heading: any, index: number) => (
-      <li>
-        <a href={`#${heading.slug}`}>
-          {heading.text}
-        </a>
-      </li>
-    ))}
-  </ol>
+  <header class="border-b border-neutral-300/60 dark:border-neutral-700/60 py-4">
+    <h1 class="font-geist text-4xl font-bold tracking-tight text-black dark:text-white mb-2">
+      {data.title}
+    </h1>
+  
+    <p class="text-base text-gray-700 dark:text-gray-300 mb-2">
+      {data.description}
+    </p>
+  
+    <div class="flex justify-start mb-2">
+      <div class="flex justify-center items-end gap-1 p-1 rounded border border-neutral-300/60 dark:border-neutral-700/60">
+        <Calendar class="size-4" />
+    
+        <p class="font-geist text-xs text-neutral-900 dark:text-neutral-100">
+          {dateFormat(data.date)}
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <section class="mb-8 border-b border-neutral-300/60 dark:border-neutral-700/60 py-4">
+    <p class="font-geist text-lg tracking-tight leading-6 text-neutral-900/90 dark:text-neutral-100/90 mb-4">
+      Tabla de contenido:
+    </p>
+
+    <ol class="list-none flex flex-col gap-2">
+      {headings.map((heading: any, index: number) => (
+        <li>
+          <a
+            href={`#${heading.slug}`}
+            class="font-geist ml-4 text-sm text-black dark:text-white hover:text-black/90 dark:hover:text-white/90 transition-colors border-dotted border-b-2 border-black dark:border-white hover:border-black/90 dark:hover:border-white/90"
+          >
+            {index + 1}. {heading.text}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
 
   <Content components={components} />
 </Layout>
