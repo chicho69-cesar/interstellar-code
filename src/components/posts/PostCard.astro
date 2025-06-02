@@ -1,7 +1,8 @@
 ---
 import Calendar from '@/icons/general/Calendar.astro';
 import { dateFormat } from '@/lib/formatter';
-import type { CollectionEntry } from 'astro:content'
+import type { CollectionEntry } from 'astro:content';
+import { TAGS } from '@/constants/tags';
 
 interface Props {
   post: CollectionEntry<'blog'>
@@ -24,6 +25,23 @@ const { data } = post;
   <p class="font-geist text-sm text-neutral-600 dark:text-neutral-400 mt-2">
     {data.description}
   </p>
+
+  <ul class='flex flex-row flex-wrap mt-2 gap-2'>
+    {data.tags.map((tag: string) => {
+      const Icon = TAGS[tag.toUpperCase()]?.icon || TAGS['DEFAULT'].icon;
+      
+      return (
+        <li>
+          <span
+            class={`flex items-center gap-x-2 rounded-full backdrop-blur-md text-xs font-bold font-mono ${TAGS[tag.toUpperCase()].class } py-1 px-3`}
+          >
+            {<Icon class='size-4' />}
+            {tag}
+          </span>
+        </li>
+      )
+    })}
+  </ul>
 
   <footer class="flex items-center justify-between mt-4">
     <div class="flex justify-center items-end gap-1 p-1 rounded border border-neutral-300/60 dark:border-neutral-700/60">
