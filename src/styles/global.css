@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -21,4 +22,26 @@
 @theme {
   --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-geist-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  p code, li code, span code {
+    background-color: #1e1e2f;
+    color: #80d4ff;
+    padding: 0.125em 0.35em;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+  }
+}
+
+@media screen and (prefers-color-scheme: light) {
+  p code, li code, span code {
+    background-color: #fff;
+    color: #d63384;
+    padding: 0.125em 0.35em;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+  }
 }
