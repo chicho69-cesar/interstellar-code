@@ -7,3 +7,409 @@ slug: css-grid-guideline
 ---
 
 # Guía de CSS Grid
+
+CSS Grid es una forma de usar CSS que nos va a permitir crear estructuras y layouts de una forma sumamente fácil y sencilla. Tales como layouts responsive y Grids complejas. Este es un sistema de rejilla mediante filas y columnas que nos permite trabajar la estructura de nuestra pagina mediante filas y columnas.
+
+En CSS Grid contamos con dos tipos de Grid, la *La Grid Explicita* y *La Grid Implícita*, como su propio nombre lo indica la Grid Explicita es la que nosotros especificamos como es que se va a estructurar, por su parte la Grid Implícita es cuando definimos una parte de una Grid y la otra parte CSS de forma automática las completa.
+
+
+## Introducción a Grid
+
+Para especificar que un contenedor será un Layout Grid, utilizamos la propiedad display, con el valor grid, además contamos con formas de especificar como se van a crear las filas y las columnas, para las columnas usamos la propiedad *grid-template-columns* y para las filas utilizamos la propiedad *grid-template-rows*, a continuación podemos observar un ejemplo básico de una Grid:
+
+```css
+.contenedor {
+  display: grid;
+  /* Con estamos especificando el contenedor va a ser una grid o rejilla */
+
+  /* grid-template-columns: 100px 100px 200px; /* Con esto especificamos el numero de columnas de nuestra rejilla, podemos usar medidas o fr, por ejemplo si usamos 1fr 1fr tendremos dos columnas del mismo tamaño y ocupan todo el ancho del contenedor*/
+
+  grid-template-columns: 1fr 1fr 2fr;
+  /* Cada columna ocupa el 25% de la grid y la tercera el 50% */
+
+  grid-template-rows: 150px 300px;
+  /* Con esto especificamos el alto de cada fila de la grid, si queremos usar fracciones de tamaño debemos de especificar un alto a nuestro contenedor */
+
+  grid-gap: 20px;
+  /* Con esto especificamos la separación entre cada elemento */
+}
+```
+
+
+## Medidas Mínimas y Máximas 
+
+Es muy común que cuando estamos creando una Grid queramos que una columna o una fila tengan un ancho/alto mínimo o máximo al hacer un diseño responsive, para ello contamos con la función *minmax()*, la cual recibe dos parámetros, el primero es la medida mínima y el segundo es la medida máxima. A continuación se muestra un ejemplo básico de como utilizar esta función:
+
+```css
+.contenedor {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) 1fr;
+  /* La función minmax es para especificar un tamaño
+ mínimo y uno máximo a una columna, recibiendo los parámetros en este orden (mínimo, máximo). En este caso la columna 1 tendrá un tamaño mínimo de 300px y uno máximo de una fracción */
+  grid-template-rows: minmax(150px, auto) 400px;
+  /* Para las filas esta función es muy usada el valor auto es para que el tamaño máximo sea automático dependiendo el contenido */
+  grid-gap: 20px;
+}
+```
+
+
+## Función Repeat
+
+La función *repeat()* es una de las funciones más útiles para CSS Grid, ya que esta función la podemos utilizar cuando queramos definir una rejilla de un número alto de filas o columnas y todas tendrán el mismo tamaño, por ello esta nos permite hacer esto de forma más simple. A continuación se muestra un ejemplo básico del uso de esta función:
+
+```css
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  /* La función de repeat nos permite reducir el numero de veces que repetimos una misma medida de una columna. En este caso lo que queremos decir es que ponga 1fr 4 veces, por lo que tendremos cuatro columnas de una fracción */
+  grid-template-rows: repeat(3, 120px);
+  /* Ponemos las tres filas con un ancho de 120px. Si pongo por ejemplo repeat(4, 120px) hace que se generen 4 filas pero como solo se ocupa 3, queda una libre */
+  grid-template-rows: 150px repeat(2, 1fr);
+  /* Aquí lo que hacemos es que la primera fila tendrá un ancho de 150px y las otras 2 1fr */
+}
+```
+
+
+## Posicionamiento 
+
+Al momento de crear un Layout complejo una de las claves más importantes es el posicionamiento de los elementos dentro de este Layout, mediante CSS Grid es sumamente sencillo alterar la forma en como se posicionan los elementos dentro de la Grid, cuando hablamos de posicionamiento estamos hablando de la celda dentro de la Grid que ocupara un elemento. Para alterar el posicionamiento de los elementos podemos utilizar las siguientes propiedades:
+
+- **grid-column-start**: Con esta propiedad le especificamos al elemento en que columna de la Grid empezara.
+- **grid-column-end**: Mediante esta propiedad especificamos en que columna terminara el elemento dentro de la Grid.
+- **grid-row-start**: Con esta propiedad le especificamos al elemento en que fila de la Grid empezara el elemento.
+- **grid-row-end**: Mediante esta propiedad especificamos en que fila va a terminar el elemento dentro de la Grid.
+- **grid-column**: Esta propiedad es una abreviación de las dos propiedades para columnas anteriores, el formato para el valor es: grid-column-start / grid-column-end.
+- **grid-row**: Esta propiedad es una abreviación de las dos propiedades para filas anteriores, el formato para el valor es: grid-row-start / grid-row-end.
+- **grid-area**: Esta propiedad es una abreviación de todas las propiedades anteriores, es decir, esta propiedad acepta cuatro parámetros para la posición, el formato del valor es: grid-row-start / grid-column-start / grid-row-end / grid-column-end.
+
+A continuación se muestra un ejemplo de estas propiedades:
+
+```css
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.contenedor .item {
+  background-color: #ff8000;
+
+  /* grid-column-start: 1; Con esto le indicamos a este elemento que empiece en la columna 1 */
+  /* grid-column-end: 4; Con esto le indicamos a este elemento que finalice en la columna 4 */
+  /* Con estos valores este contenedor abarcara 2 columnas ya que empezara en la columna 2 y 
+    terminara hasta la 4 */
+
+  /* grid-column-start: 1;
+    grid-column-end: -1; */
+  /* Con esto le indicamos que empiece en la columna y termine en la primera de derecha a izquierda */
+
+  /* grid-row-start: 2;
+    grid-row-end: 4; */
+  /* Esto es lo mismo que arriba solamente que con filas, también funciona con números negativos*/
+
+  /* grid-column: 1 / 4;
+    grid-row: 2 / 4 ; */
+  /* Esto es un atajo a lo que hicimos arriba */
+
+  /** Estructura de grid-area
+    ** Primer parámetro: grid-row-start
+    ** Segundo parámetro: grid-column-start
+    ** Tercer parámetro: grid-row-end
+    ** Cuarto parámetro: grid-column-end
+
+    ** Ademas de que tenemos estas dos estructuras
+    */
+
+  /* grid-area: 2 / 1 / 4 / 4;
+    grid-area: 2 1 4 4; */
+
+  /** span */
+  grid-column: 1 / span 3;
+  /* Con esto le decimos al elemento que empiece en la posición 1 y que abarque 3 columnas */
+  grid-column: span 3;
+  /* Con esto empieza en su posición original pero abarcara 3 columnas */
+
+  grid-row: span 3;
+}
+```
+
+
+## Grid Áreas
+
+Cuando hablamos de Grid Áreas, estamos hablando de una de las propiedades o formas de trabajar con CSS Grid más potentes que existen, mediante esta herramienta lo que hacemos es definir una estructura de una Grid dando le nombres a las celdas que ocupan las filas y columnas de las áreas, esto lo hacemos mediante la propiedad `grid-template-areas`, para poder entender bien esta herramienta veamos un ejemplo a continuación:
+
+```css
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, auto);
+
+  /* Aquí lo que hacemos es que generamos nuestra grid para que nuestros elementos se ubiquen en una posición */
+  grid-template-areas: "header    header      header"
+    "sidebar-1  contenido   sidebar-2"
+    "sidebar-1  widgets     sidebar-2"
+    "footer     footer      footer";
+}
+
+.contenedor .header {
+  background-color: #ff8000;
+
+  /* Especificamos que este elemento va a ocupar todo el area destinada al header */
+  /* Tenemos 3 formas de hacer que nuestro elemento ocupe el area deseada */
+
+  /* Forma uno */
+  /* grid-column-start: header;
+    grid-column-end: header; */
+
+  /* Forma dos */
+  /* grid-column: header / header; */
+
+  /* Forma 3 */
+  grid-area: header;
+}
+
+.contenedor .sidebar-1 {
+  background-color: #393e46;
+  grid-area: sidebar-1;
+}
+
+.contenedor .contenido {
+  background-color: #fff;
+  color: #000;
+  grid-area: contenido;
+}
+
+.contenedor .widgets {
+  background-color: #ff8000;
+  grid-area: widgets;
+}
+
+.contenedor .sidebar-2 {
+  background-color: #393e46;
+  grid-area: sidebar-2;
+}
+
+.contenedor .footer {
+  background-color: #222831;
+  grid-area: footer;
+}
+```
+
+
+## Alineación de Elementos
+
+Dentro de CSS Grid al igual que en Flexbox podemos utilizar las propiedades de alineación para alinear nuestros elementos dentro de la Grid, estas propiedades son justify-items y align-items, además de las propiedades justify-self y align-self para editar la alineación de forma individual en los elementos. A continuación se muestra un ejemplo de como usar estas propiedades:
+
+```css
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 200px);
+
+  justify-items: center;
+  /* Esta propiedad lo que hace es que hace que los elementos que conforman
+    nuestra grid no ocupen todo el tamaño disponible, sino solamente el que necesitan. Y los alinea
+    de manera horizontal según el valor que le especifiquemos */
+
+  align-items: center;
+  /* Esta propiedad hace exactamente lo mismo que la anterior solo que esta
+    alinea los elementos de manera vertical dependiendo del valor que especifiquemos */
+
+  /* El valor por defecto es auto. Otros valores son stretch que hace que el elemento ocupe todo
+    el ancho o tamaño, también tenemos start, end, center, etc. */
+}
+
+.contenedor .item {
+  background-color: #ff8000;
+
+  /* Estas dos propiedades son usadas para cambiar la alineación de los elementos de manera independiente, 
+    es decir, las propiedades del contenedor grid para alinear afectan a todos los elementos
+    pero con estas propiedades podemos cambiar esas propiedades de manera independiente para los 
+    elementos que conforman la grid */
+  justify-self: stretch;
+  /* Alineación horizontal */
+  align-self: stretch;
+  /* Alineación vertical */
+}
+```
+
+
+## Posicionamiento de Tracks
+
+El posicionamiento de tracks al igual que el posicionamiento de los elementos se utiliza son propiedades que se utilizan para alinear los elementos que forman parte de nuestro Grid, sin embargo a diferencia del posicionamiento de elementos que es empleado para alinear los elementos directamente que conforman las filas y columnas cuando estas no ocupan todo el ancho y alto que les corresponde, el posicionamiento de Tracks es utilizado para alinear y justificar los elementos dentro de los elementos que conforman las filas y columnas, es decir, no se usa para alinear filas y columnas, se usa para alinear los elementos dentro de las filas y las columnas. A continuación se muestra un ejemplo del uso de estas propiedades:
+
+```css
+.contenedor {
+  height: 700px;
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(3, 150px);
+  grid-template-rows: repeat(3, 150px);
+
+  /* Estas propiedades se usan principalmente cuando nuestros elementos no ocupan ni el ancho
+    ni el alto de nuestro contenedor */
+
+  justify-content: space-evenly;
+  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid
+    no dentro del espacio que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos
+    esta propiedad en flex-box. Esta propiedad alinea de manera horizontal */
+
+  align-content: space-evenly;
+  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid
+    no dentro del espacio  que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos
+    esta propiedad en flex-box. Esta propiedad alinea de manera vertical */
+}
+```
+
+
+## Grid Implicita
+
+Hasta el momento las propiedades y herramientas exploradas de CSS Grid corresponden con lo que conocemos como la Grid Explicita, es decir, una forma fija de definir nuestras Grids, sin embarga también contamos con herramientas que conforman lo que conocemos como Grid Implícita, donde definimos de forma dinámica de definir nuestras Grids. 
+
+Cuando trabajamos con la Grid Implícita, estamos trabajando con los elementos que no entraron en nuestra Grid Explicita, es decir, supongamos que tenemos una Grid de 3x3 con un ancho de 1fr y un alto de 150px, pero en el contenedor ponemos 11 elementos, estarán quedando 2 elementos fuera de nuestra Grid, elementos los cuales se posicionaran en una nueva fila, ocupando el ancho de los elementos de la Grid Explicita pero solo el alto que necesite.
+
+Para trabajar con estos elementos de la Grid Implícita contamos con las siguientes propiedades:
+
+- **grid-auto-flow**: Esta propiedad nos ayuda a definir donde se colocaran los elementos de la Grid Implícita, es decir si generaran nuevas columnas en el contenedor, o nuevas filas que es el valor que tienen por defecto.
+- **grid-auto-columns**: Esta propiedad nos ayuda a definir el ancho que van a tener las nuevas columnas.
+- **grid-auto-rows**: Mediante esta propiedad definimos el alto que va a ocupar las filas que se generen automáticamente. 
+
+A continuación se muestra un ejemplo completo del trabajo con la Grid Implícita:
+
+```css
+/** Grid Explicita: Es la que nosotros especificamos filas, columnas, tamaños, alineamientos, etc. */
+/** Grid Implícita: Esta conformada por los elementos que no entraron en las modificaciones y */
+/** especificaciones que hicimos en la grid explicita, por lo que estos elementos tiene un acomodo */
+/** diferente a los de la grid explicita */
+
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: 200px 100px 200px;
+
+  grid-auto-flow: row dense;
+  /** Esta propiedad es sumamente importante, ya que lo que hace es
+    ** cambiar el flow de nuestra grid, por defecto el valor es row y lo que hace es que cada
+    ** elemento lo va posicionando uno al lado del otro en dirección horizontal.
+    ** Pero si esto lo ponemos en column los elementos se colocan uno abajo del otro en 
+    ** dirección vertical */
+
+  /*! Importante: El valor de dense para la propiedad anterior hace que cuando haya espacios */
+  /*! en blanco dentro de la grid, estos se rellenen con elementos que quepan en dichos espacios */
+  /*! Este valor se puede combinar con row o column para cambiar el flujo de la grid y poder */
+  /*! Utilizar este valor de dense en dicho flujo */
+
+  /* grid-auto-columns: 1fr; */
+  /* Actualizamos el ancho de los elementos de la grid, esto solo
+    funciona cuando el flow (flujo de la grid) es en columna */
+  grid-auto-rows: 150px;
+  /* Actualizamos el alto de los elementos de la grid implícita */
+}
+
+.contenedor .span2 {
+  grid-column: span 2;
+  background-color: #ff8000;
+}
+
+.contenedor .span3 {
+  grid-column: span 3;
+  background-color: #575757;
+}
+```
+
+
+## Auto Fill y Auto Fit
+
+Los valores auto fill y auto fit son sumamente utilizadas para trabajar con Grids Implícitas, ya que estos nos ayudan a definir una Grid totalmente Implícita, sin depender de tener una Grid Explicita inicial, para utilizamos estos valores en las propiedades de grid-template-columns y grid-template-rows. El valor auto fill lo que hace es que va a rellenar nuestra fila con todas las columnas o filas que pueda dependiendo el flujo de la Grid, y cuando ya no quepan mas las va a desbordar en una nueva fila o columna. Por su parte el valor auto fit también resuelve el problema del desbordamiento pero no genera columnas ni filas implícitas.
+
+A continuación un ejemplo del uso de estos valores:
+
+```css
+.contenedor {
+  display: grid;
+  grid-gap: 20px;
+
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  /* Podemos usar la función minmax dentro de repeat */
+
+  /* Estos valores solo se pueden usar cuando usamos la función repeat */
+
+  /** El valor de auto-fill lo que hace es que va a rellenar nuestra fila con todas las columnas que
+    ** pueda poner, columnas las cuales son implícitas
+    ** pero nos ahorraría el hecho de que los elementos se desborden de nuestro contenedor
+    ** cuando ya no quepan, colocando los elementos que se desbordan en otra fila */
+
+  /** El valor auto-fit por su parte también resuelve el problema del desbordamiento, pero este no genera columnas implícitas */
+}
+```
+
+
+## CSS Subgrid
+
+CSS Subgrid es una funcionalidad avanzada de CSS Grid, la cual nos permite definir a un contenedor secundario (hijo) que herede y se alinee con la estructura de la cuadricula de su contenedor principal (padre). Esto permite que los elementos anidados mantengan una alineación coherente con la cuadricula de su antecesor sin necesidad de definir una nueva Grid independiente.
+
+Antes de CSS Subgrid los elementos anidados tenían que definir su propia cuadricula, lo cual podía romper la alineación con su contenedor padre. Con Subgrid los elementos secundarios pueden compartir las líneas de la cuadricula del contenedor padre, manteniendo la alineación visual más precisa. 
+
+Para crear un Subgrid primero debemos definir un contenedor Grid principal, después hacer que un elemento hijo sea una subgrid especificando `display: grid;` y `grid-template-columns: subgrid;` o `grid-template-rows: subgrid;`. 
+
+A continuación se muestra un ejemplo del uso de CSS Subgrid:
+
+**index.html**
+```html
+<div class="container">
+  <div class="card">
+    <div class="title">Título de la Tarjeta</div>
+    <div class="subtitle">Subtítulo</div>
+    
+    <div class="content">
+      Este es el contenido de la tarjeta.
+    </div>
+  </div>
+</div>
+```
+
+**styles.css**
+```css
+.container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  padding: 20px;
+  background: #f00;
+}
+
+.card {
+  display: grid;
+  grid-column: span 3; /* La tarjeta ocupa todas las columnas */
+  grid-template-columns: subgrid; /* Hereda la estructura del padre */
+  grid-template-rows: auto auto auto;
+  border: 2px solid #333;
+  padding: 10px;
+  background: #0f0;
+}
+
+.title {
+  grid-column: span 3; /* Ocupa todas las columnas */
+  font-weight: bold;
+  font-size: 1.5em;
+  text-align: center;
+  background-color: #f1f1f1;
+}
+
+.subtitle {
+  grid-column: span 2;
+  font-style: italic;
+  color: gray;
+  background-color: #e1e1e1;
+}
+
+.content {
+  grid-column: span 3; /* Ocupa todas las columnas */
+  background-color: #d1d1d1;
+}
+```
