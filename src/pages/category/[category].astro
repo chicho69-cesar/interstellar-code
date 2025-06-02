@@ -1,7 +1,47 @@
 ---
+import PostCard from "@/components/posts/PostCard.astro";
+import Layout from "@/layouts/Layout.astro";
 import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
 
-export const getStaticPaths = (() => {
-  return [];
+export const getStaticPaths = (async () => {
+  const posts = await getCollection("blog");
+
+  const tags = posts
+    .flatMap((post) => post.data.tags || [])
+    .filter((tag, index, self) => self.indexOf(tag) === index);
+
+  return tags.map((tag) => {
+    const postsFiltered = posts.filter((post) => post.data.tags?.includes(tag));
+
+    return ({
+      params: { category: tag.toLowerCase() },
+      props: { posts: postsFiltered },
+    })
+  });
 }) satisfies GetStaticPaths;
+
+const { posts } = Astro.props;
 ---
+
+<Layout>
+	<p class="font-geist text-base tracking-tight leading-6 text-neutral-900 dark:text-neutral-100 text-pretty my-12">
+		<span class="font-geist font-bold text-neutral-900/90 dark:text-neutral-100/90">¡Bienvenidos a Interstellar Code!</span> Aquí podrás encontrar consejos prácticos y guías sobre diversos temas, como tecnología, programación y desarrollo profesional. A través de este espacio, espero que encuentres ayuda e inspiración para tus proyectos y desafíos diarios. 
+	</p>
+
+	<h2 class="font-geist text-xl text-neutral-900/90 dark:text-neutral-100/90 font-semibold">
+		Post de la categoría: <span class="capitalize font-normal">{Astro.params.category}</span>
+	</h2>
+
+  {posts.length === 0 && (
+    <p class="font-geist text-base text-neutral-500 dark:text-neutral-400 mt-4">
+      No hay posts en esta categoría.
+    </p>
+  )}
+
+	<section class="grid grid-cols-1 gap-4 mt-6">
+		{posts.map((post) => (
+			<PostCard post={post} />
+		))}
+	</section>
+</Layout>
