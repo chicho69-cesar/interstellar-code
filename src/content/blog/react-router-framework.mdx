@@ -1,0 +1,380 @@
+---
+title: React Router Framework
+description: Descubre las novedades de la evolución de la librería React Router y cómo se mezclo con Remix para crear un framework para React, que se muestra como una alternativa real y prometedora a NextJS.
+date: 2025-06-03
+tags: [React Router, React]
+slug: react-router-framework
+---
+
+# React Router Framework
+
+React Router es una de las librerías más populares para el enrutamiento en aplicaciones de React. Con el tiempo, ha evolucionado y actualmente en su versión número 7 se ha transformado y ahora existen dos formas principales para utilizarla, tanto como una librería simple de routing como lo ha sido siempre, y ahora como un framework con *Server Side Rendering*, *Static Site Generation* y *Client Side Rendering*.
+
+Para crear un proyecto con React Router como framework es tan sencillo como ejecutar el siguiente comando:
+
+```bash
+npx create-react-router@latest my-app
+```
+
+<br />
+## Routing
+
+Así como en la mayoría de los frameworks, el enrutamiento es una parte fundamental. En React Router, se pueden crear rutas con muchas estrategias diferentes para manejar la navegación, esto anteriormente se hacía mediante el file system, pero ahora las rutas se definen en el archivo `app/routes.tsx` que se genera automáticamente al crear el proyecto.
+
+Estas rutas se definen exportando un array con las rutas de nuestra aplicación, y existen varias formas de definirlas, las cuales son:
+
+- **index**: Define una ruta de principal, que es la ruta predeterminada para un grupo de rutas, es decir si tienes la ruta `/concerts` y defines un `index`, esta será la ruta que se cargará al acceder a `/concerts`.
+- **route**: Define una ruta específica con un nombre y un componente asociado.
+- **layout**: Define un layout que se aplicará a un grupo de rutas, permitiendo compartir componentes como encabezados o barras laterales.
+- **prefix**: Permite agrupar rutas bajo un prefijo común, lo que facilita la organización de las rutas y su estructura jerárquica.
+- **nested routes**: Permite definir rutas anidadas, lo que significa que una ruta puede contener otras rutas dentro de ella, creando una estructura jerárquica de navegación.
+- **params**: Permite definir parámetros en las rutas, lo que permite crear rutas dinámicas que pueden cambiar según los datos proporcionados, por ejemplo, una ruta que muestre información de un concierto específico según la ciudad.
+
+```ts
+import {
+  type RouteConfig,
+  route,
+  index,
+  layout,
+  prefix,
+} from "@react-router/dev/routes";
+
+export default [
+  index("./home.tsx"),
+  route("about", "./about.tsx"),
+
+  ...prefix("auth",
+    layout("./auth/layout.tsx", [
+      route("login", "./auth/login.tsx"),
+      route("register", "./auth/register.tsx"),
+    ])
+  ),
+
+  ...prefix("concerts", [
+    index("./concerts/home.tsx"),
+    route(":city", "./concerts/city.tsx"),
+    route("trending", "./concerts/trending.tsx"),
+  ]),
+
+  route("settings", "./settings/settings.tsx", [
+    route("profile", "./settings/profile.tsx"),
+    route("notifications", "./settings/notifications.tsx"),
+  ]),
+] satisfies RouteConfig;
+```
+
+<br />
+## Route Module
+
+Los Route Modules son todos los archivos que se definen en el archivo `app/routes.tsx`, es decir, las rutas y archivos que definen el routing de nuestra aplicación, cada uno de estos módulos definen una serie de funciones y propiedades que permiten manejar la lógica de cada ruta. Estas son las funciones y propiedades más comunes que se pueden definir en un Route Module:
+
+**1.- Props**: Las props de un Route Module son las propiedades que se pasan al componente de la ruta, estas incluyen datos cargados por el loader, datos de la acción, parámetros de la ruta y coincidencias de rutas.
+
+```tsx
+import type { Route } from "./+types/route-name";
+
+export default function MyRouteComponent({
+  loaderData,
+  actionData,
+  params,
+  matches,
+}: Route.ComponentProps) {
+  return (
+    <div>
+      <h1>Welcome to My Route with Props!</h1>
+      <p>Loader Data: {JSON.stringify(loaderData)}</p>
+      <p>Action Data: {JSON.stringify(actionData)}</p>
+      <p>Route Parameters: {JSON.stringify(params)}</p>
+      <p>Matched Routes: {JSON.stringify(matches)}</p>
+    </div>
+  );
+}
+```
+
+**2.- loader**: Los route loaders son funciones que se ejecutan en el servidor antes de renderizar la ruta, permitiendo cargar datos necesarios para la ruta. Estos datos se pasan al componente de la ruta a través de las props.
+
+```tsx
+export async function loader() {
+  return { message: "Hello, world!" };
+}
+
+export default function MyRoute({ loaderData }) {
+  return <h1>{loaderData.message}</h1>;
+}
+```
+
+**3.- clientLoader**: Los client loaders son funciones que se ejecutan en el cliente, permitiendo cargar datos necesarios para la ruta después de que la página se ha cargado. Cuando definimos un client loader, este recibe el server loader y lo podemos ejecutar para cargar la data del servidor, y la data que se exporta desde este es la que se utilizará en el componente de la ruta.
+
+```tsx
+export async function clientLoader({ serverLoader }) {
+  const serverData = await serverLoader();
+  const data = getDataFromClient();
+  return { data, serverData };
+}
+
+export default function MyRoute({ loaderData }) {
+  return <h1>{loaderData.serverData.message}</h1>;
+}
+```
+
+**4.- action**: Las acciones son funciones que se ejecutan en el servidor cuando se llama un `<Form></Form>`, `useFetcher` o `useSubmit`, estas acciones realizan mutaciones de datos y al ejecutarse provoca que se revaliden los loaders de las rutas afectadas.
+
+```tsx
+import { Form } from "react-router";
+import { TodoList } from "~/components/TodoList";
+
+export async function loader() {
+  const items = await fakeDb.getItems();
+  return { items };
+}
+
+export async function action({ request }) {
+  const data = await request.formData();
+  const todo = await fakeDb.addItem({
+    title: data.get("title"),
+  });
+
+  return { ok: true };
+}
+
+export default function Page({ loaderData }) {
+  return (
+    <div>
+      <TodoList items={loaderData.items} />
+
+      <Form method="post" navigate={false} action="/list">
+        <input type="text" name="title" />
+        <button type="submit">Create Todo</button>
+      </Form>
+    </div>
+  );
+}
+```
+
+**5.- clientAction**: Al igual que como funcionan los loaders y client loaders, al definir una client action esta es la que se ejecuta en la ruta en vez de la server action, esta se ejecuta en el cliente y al igual que los loaders esta recibe la server action para poder ejecutarla y revalidar los loaders de las rutas afectadas.
+
+```tsx
+export async function clientAction({ serverAction }) {
+  const data = await serverAction();
+  return data;
+}
+```
+
+**6.- ErrorBoundary**: Los Error Boundaries son componentes que se utilizan para manejar errores en las rutas, estos se definen en el Route Module y permiten capturar errores que ocurren durante la renderización de la ruta o en los loaders y acciones. Si ocurre un error, el Error Boundary se activa y muestra un mensaje de error personalizado.
+
+```tsx
+import {
+  isRouteErrorResponse,
+  useRouteError,
+} from "react-router";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <h1>
+          {error.status} {error.statusText}
+        </h1>
+        <p>{error.data}</p>
+      </div>
+    );
+  } else if (error instanceof Error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{error.message}</p>
+        <p>The stack trace is:</p>
+        <pre>{error.stack}</pre>
+      </div>
+    );
+  } else {
+    return <h1>Unknown Error</h1>;
+  }
+}
+```
+
+**7.- HydrateFallback**: Los Hydrate Fallback son componentes que se utilizan para mostrar un componente de carga mientras se carga la información del client loader en la ruta, es decir, es un loading que se muestra mientras se espera que el client loader se ejecute y devuelva los datos necesarios para renderizar la ruta.
+
+```tsx
+export async function clientLoader() {
+  const data = await fakeLoadLocalGameData();
+  return data;
+}
+
+export function HydrateFallback() {
+  return <p>Loading Game...</p>;
+}
+
+export default function Component({ loaderData }) {
+  return <Game data={loaderData} />;
+}
+```
+
+**8.- headers**: Los headers son propiedades que se pueden definir en el Route Module para establecer encabezados HTTP personalizados para la ruta, estos encabezados se envían al cliente cuando se carga la ruta y pueden ser utilizados para controlar el comportamiento del navegador, como la caché o la seguridad.
+
+```tsx
+export function headers() {
+  return {
+    "X-Stretchy-Pants": "its for fun",
+    "Cache-Control": "max-age=300, s-maxage=3600",
+  };
+}
+```
+
+**9.- links**: Los links por su parte son propiedades que se definen en el Route Module para cargar o pre cargar recursos adicionales necesarios para la ruta, como hojas de estilos, iconos o scripts.
+
+```tsx
+export function links() {
+  return [
+    {
+      rel: "icon",
+      href: "/favicon.png",
+      type: "image/png",
+    },
+    {
+      rel: "stylesheet",
+      href: "https://example.com/some/styles.css",
+    },
+    {
+      rel: "preload",
+      href: "/images/banner.jpg",
+      as: "image",
+    },
+  ];
+}
+```
+
+**10.- meta**: Los meta son propiedades que se definen en el Route Module para establecer metadatos personalizados para la ruta, estos metadatos se utilizan para mejorar la accesibilidad y el SEO de la ruta, como el título de la página, la descripción o las palabras clave.
+
+```tsx
+export function meta() {
+  return [
+    {
+      title: "Very cool app"
+    },
+    {
+      property: "og:title",
+      content: "Very cool app",
+    },
+    {
+      name: "description",
+      content: "This app is the best",
+    },
+  ];
+}
+```
+
+<br />
+## Estrategias de renderizado
+
+Para emplear diversas estrategias de renderizado en React Router se necesitan definir las mismas en el archivo de configuración `react-router-config.ts`. Estas estrategias de renderizado son:
+
+**1.- Client Side Rendering**: Es la estrategia más común y mediante la cual las páginas se renderizan del lado del cliente, causando que solo se puedan usar los loaders y actions del lado del cliente.
+
+```ts
+import type { Config } from "@react-router/dev/config";
+
+export default {
+  ssr: false,
+} satisfies Config;
+```
+
+**2.- Server Side Rendering**: Permite renderizar las páginas del lado del servidor, lo que mejora el rendimiento y la experiencia del usuario, ya que las páginas se cargan más rápido y son más accesibles para los motores de búsqueda.
+
+```ts
+import type { Config } from "@react-router/dev/config";
+
+export default {
+  ssr: true,
+} satisfies Config;
+```
+
+**3.- Static Site Generation**: Permite generar páginas estáticas en el momento de la construcción de la aplicación, haciendo que las funciones loaders se ejecuten en el momento de construcción e insertando dichos datos en el HTML generado, lo que mejora enormemente el rendimiento.
+
+```ts
+import type { Config } from "@react-router/dev/config";
+
+export default {
+  async prerender() {
+    return ["/", "/about", "/contact"];
+  },
+} satisfies Config;
+```
+
+<br />
+## Navegación
+
+La navegación en React Router se maneja de manera similar a otros frameworks, pero con algunas particularidades. Para navegar entre rutas se pueden utilizar los siguientes métodos:
+
+**1.- Link**: El componente `Link` se utiliza para crear enlaces entre rutas, permitiendo la navegación sin recargar la página.
+
+```tsx
+import { Link } from "react-router";
+
+export function LoggedOutMessage() {
+  return (
+    <p>
+      You've been logged out.{" "}
+      <Link to="/login">Login again</Link>
+    </p>
+  );
+}
+```
+
+**2.- NavLink**: El componente `NavLink` es similar a `Link`, pero permite aplicar estilos activos a los enlaces cuando la ruta está activa, lo que facilita la navegación y la indicación de la ruta actual.
+
+```tsx
+// className
+<NavLink
+  to="/messages"
+  className={({ isActive, isPending, isTransitioning }) =>
+    [
+      isPending ? "pending" : "",
+      isActive ? "active" : "",
+      isTransitioning ? "transitioning" : "",
+    ].join(" ")
+  }
+>
+  Messages
+</NavLink>
+```
+
+**3.- Form**: El componente `Form` se utiliza para enviar datos a través de formularios, permitiendo la navegación y la ejecución de acciones en el servidor.
+
+```tsx
+<Form action="/search">
+  <input type="text" name="q" />
+</Form>
+```
+
+**4.- redirect**: El método `redirect` se utiliza para redirigir a una ruta específica, permitiendo cambiar la ubicación actual de la aplicación sin recargar la página.
+
+```tsx
+import { redirect } from "react-router";
+
+export async function loader({ request }) {
+  let user = await getUser(request);
+
+  if (!user) {
+    return redirect("/login");
+  }
+
+  return { userName: user.name };
+}
+```
+
+**5.- useNavigate**: El hook `useNavigate` se utiliza para programáticamente navegar a una ruta específica, permitiendo cambiar la ubicación actual de la aplicación desde cualquier parte del código.
+
+```tsx
+import { useNavigate } from "react-router";
+
+export function useLogoutAfterInactivity() {
+  let navigate = useNavigate();
+
+  useFakeInactivityHook(() => {
+    navigate("/logout");
+  });
+}
+```
