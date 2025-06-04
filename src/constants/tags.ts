@@ -10,7 +10,8 @@ import JavaScript from '@/icons/tech/JavaScript.astro'
 // import NextJS from '@/icons/tech/NextJS.astro'
 import Node from '@/icons/tech/Node.astro'
 // import Python from '@/icons/tech/Python.astro'
-// import React from '@/icons/tech/React.astro'
+import React from '@/icons/tech/React.astro'
+import ReactRouter from '@/icons/tech/ReactRouter.astro'
 // import Spring from '@/icons/tech/Spring.astro'
 // import Tailwind from '@/icons/tech/Tailwind.astro'
 import TypeScript from '@/icons/tech/TypeScript.astro'
@@ -56,11 +57,11 @@ export const TAGS: any = {
   //   class: 'bg-[#3572A599] text-white',
   //   icon: Python,
   // },
-  // REACT: {
-  //   name: 'React',
-  //   class: 'bg-[#61dafb55] text-black',
-  //   icon: React
-  // },
+  REACT: {
+    name: 'React',
+    class: 'bg-[#61dafb55] text-white',
+    icon: React
+  },
   // SPRING: {
   //   name: 'Spring',
   //   class: 'bg-[#b3e5fc] text-black',
@@ -96,4 +97,9 @@ export const TAGS: any = {
     class: 'bg-[#8CC84B99] text-white',
     icon: Node,
   },
+  'REACT ROUTER': {
+    name: 'React Router',
+    class: 'bg-[#CA424599] text-white',
+    icon: ReactRouter,
+  }
 }

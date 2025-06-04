@@ -15,7 +15,7 @@ En CSS Grid contamos con dos tipos de Grid, la *La Grid Explicita* y *La Grid Im
 
 ## Introducción a Grid
 
-Para especificar que un contenedor será un Layout Grid, utilizamos la propiedad display, con el valor grid, además contamos con formas de especificar como se van a crear las filas y las columnas, para las columnas usamos la propiedad *grid-template-columns* y para las filas utilizamos la propiedad *grid-template-rows*, a continuación podemos observar un ejemplo básico de una Grid:
+Para especificar que un contenedor será un Layout Grid, utilizamos la propiedad display, con el valor grid, además contamos con formas de especificar como se van a crear las filas y las columnas, para las columnas usamos la propiedad `grid-template-columns` y para las filas utilizamos la propiedad `grid-template-rows`, a continuación podemos observar un ejemplo básico de una Grid:
 
 ```css
 .contenedor {
@@ -35,27 +35,26 @@ Para especificar que un contenedor será un Layout Grid, utilizamos la propiedad
 }
 ```
 
-
+<br />
 ## Medidas Mínimas y Máximas 
 
-Es muy común que cuando estamos creando una Grid queramos que una columna o una fila tengan un ancho/alto mínimo o máximo al hacer un diseño responsive, para ello contamos con la función *minmax()*, la cual recibe dos parámetros, el primero es la medida mínima y el segundo es la medida máxima. A continuación se muestra un ejemplo básico de como utilizar esta función:
+Es muy común que cuando estamos creando una Grid queramos que una columna o una fila tengan un *ancho/alto* mínimo o máximo al hacer un diseño responsive, para ello contamos con la función `minmax()`, la cual recibe dos parámetros, el primero es la medida mínima y el segundo es la medida máxima. A continuación se muestra un ejemplo básico de como utilizar esta función:
 
 ```css
 .contenedor {
   display: grid;
   grid-template-columns: minmax(300px, 1fr) 1fr;
-  /* La función minmax es para especificar un tamaño
- mínimo y uno máximo a una columna, recibiendo los parámetros en este orden (mínimo, máximo). En este caso la columna 1 tendrá un tamaño mínimo de 300px y uno máximo de una fracción */
+  /* La función minmax es para especificar un tamaño mínimo y uno máximo a una columna, recibiendo los parámetros en este orden (mínimo, máximo). En este caso la columna 1 tendrá un tamaño mínimo de 300px y uno máximo de una fracción */
   grid-template-rows: minmax(150px, auto) 400px;
   /* Para las filas esta función es muy usada el valor auto es para que el tamaño máximo sea automático dependiendo el contenido */
   grid-gap: 20px;
 }
 ```
 
-
+<br />
 ## Función Repeat
 
-La función *repeat()* es una de las funciones más útiles para CSS Grid, ya que esta función la podemos utilizar cuando queramos definir una rejilla de un número alto de filas o columnas y todas tendrán el mismo tamaño, por ello esta nos permite hacer esto de forma más simple. A continuación se muestra un ejemplo básico del uso de esta función:
+La función `repeat()` es una de las funciones más útiles para CSS Grid, ya que esta función la podemos utilizar cuando queramos definir una rejilla de un número alto de filas o columnas y todas tendrán el mismo tamaño, por ello esta nos permite hacer esto de forma más simple. A continuación se muestra un ejemplo básico del uso de esta función:
 
 ```css
 .contenedor {
@@ -70,7 +69,7 @@ La función *repeat()* es una de las funciones más útiles para CSS Grid, ya qu
 }
 ```
 
-
+<br />
 ## Posicionamiento 
 
 Al momento de crear un Layout complejo una de las claves más importantes es el posicionamiento de los elementos dentro de este Layout, mediante CSS Grid es sumamente sencillo alterar la forma en como se posicionan los elementos dentro de la Grid, cuando hablamos de posicionamiento estamos hablando de la celda dentro de la Grid que ocupara un elemento. Para alterar el posicionamiento de los elementos podemos utilizar las siguientes propiedades:
@@ -79,9 +78,9 @@ Al momento de crear un Layout complejo una de las claves más importantes es el 
 - **grid-column-end**: Mediante esta propiedad especificamos en que columna terminara el elemento dentro de la Grid.
 - **grid-row-start**: Con esta propiedad le especificamos al elemento en que fila de la Grid empezara el elemento.
 - **grid-row-end**: Mediante esta propiedad especificamos en que fila va a terminar el elemento dentro de la Grid.
-- **grid-column**: Esta propiedad es una abreviación de las dos propiedades para columnas anteriores, el formato para el valor es: grid-column-start / grid-column-end.
-- **grid-row**: Esta propiedad es una abreviación de las dos propiedades para filas anteriores, el formato para el valor es: grid-row-start / grid-row-end.
-- **grid-area**: Esta propiedad es una abreviación de todas las propiedades anteriores, es decir, esta propiedad acepta cuatro parámetros para la posición, el formato del valor es: grid-row-start / grid-column-start / grid-row-end / grid-column-end.
+- **grid-column**: Esta propiedad es una abreviación de las dos propiedades para columnas anteriores, el formato para el valor es: `grid-column-start / grid-column-end`.
+- **grid-row**: Esta propiedad es una abreviación de las dos propiedades para filas anteriores, el formato para el valor es: `grid-row-start / grid-row-end`.
+- **grid-area**: Esta propiedad es una abreviación de todas las propiedades anteriores, es decir, esta propiedad acepta cuatro parámetros para la posición, el formato del valor es: `grid-row-start / grid-column-start / grid-row-end / grid-column-end`.
 
 A continuación se muestra un ejemplo de estas propiedades:
 
@@ -98,8 +97,7 @@ A continuación se muestra un ejemplo de estas propiedades:
 
   /* grid-column-start: 1; Con esto le indicamos a este elemento que empiece en la columna 1 */
   /* grid-column-end: 4; Con esto le indicamos a este elemento que finalice en la columna 4 */
-  /* Con estos valores este contenedor abarcara 2 columnas ya que empezara en la columna 2 y 
-    terminara hasta la 4 */
+  /* Con estos valores este contenedor abarcara 2 columnas ya que empezara en la columna 2 y terminara hasta la 4 */
 
   /* grid-column-start: 1;
     grid-column-end: -1; */
@@ -135,7 +133,7 @@ A continuación se muestra un ejemplo de estas propiedades:
 }
 ```
 
-
+<br />
 ## Grid Áreas
 
 Cuando hablamos de Grid Áreas, estamos hablando de una de las propiedades o formas de trabajar con CSS Grid más potentes que existen, mediante esta herramienta lo que hacemos es definir una estructura de una Grid dando le nombres a las celdas que ocupan las filas y columnas de las áreas, esto lo hacemos mediante la propiedad `grid-template-areas`, para poder entender bien esta herramienta veamos un ejemplo a continuación:
@@ -198,10 +196,10 @@ Cuando hablamos de Grid Áreas, estamos hablando de una de las propiedades o for
 }
 ```
 
-
+<br />
 ## Alineación de Elementos
 
-Dentro de CSS Grid al igual que en Flexbox podemos utilizar las propiedades de alineación para alinear nuestros elementos dentro de la Grid, estas propiedades son justify-items y align-items, además de las propiedades justify-self y align-self para editar la alineación de forma individual en los elementos. A continuación se muestra un ejemplo de como usar estas propiedades:
+Dentro de CSS Grid al igual que en Flexbox podemos utilizar las propiedades de alineación para alinear nuestros elementos dentro de la Grid, estas propiedades son `justify-items` y `align-items`, además de las propiedades `justify-self` y `align-self` para editar la alineación de forma individual en los elementos. A continuación se muestra un ejemplo de como usar estas propiedades:
 
 ```css
 .contenedor {
@@ -211,25 +209,18 @@ Dentro de CSS Grid al igual que en Flexbox podemos utilizar las propiedades de a
   grid-template-rows: repeat(3, 200px);
 
   justify-items: center;
-  /* Esta propiedad lo que hace es que hace que los elementos que conforman
-    nuestra grid no ocupen todo el tamaño disponible, sino solamente el que necesitan. Y los alinea
-    de manera horizontal según el valor que le especifiquemos */
+  /* Esta propiedad lo que hace es que hace que los elementos que conforman nuestra grid no ocupen todo el tamaño disponible, sino solamente el que necesitan. Y los alinea de manera horizontal según el valor que le especifiquemos */
 
   align-items: center;
-  /* Esta propiedad hace exactamente lo mismo que la anterior solo que esta
-    alinea los elementos de manera vertical dependiendo del valor que especifiquemos */
+  /* Esta propiedad hace exactamente lo mismo que la anterior solo que esta alinea los elementos de manera vertical dependiendo del valor que especifiquemos */
 
-  /* El valor por defecto es auto. Otros valores son stretch que hace que el elemento ocupe todo
-    el ancho o tamaño, también tenemos start, end, center, etc. */
+  /* El valor por defecto es auto. Otros valores son stretch que hace que el elemento ocupe todo el ancho o tamaño, también tenemos start, end, center, etc. */
 }
 
 .contenedor .item {
   background-color: #ff8000;
 
-  /* Estas dos propiedades son usadas para cambiar la alineación de los elementos de manera independiente, 
-    es decir, las propiedades del contenedor grid para alinear afectan a todos los elementos
-    pero con estas propiedades podemos cambiar esas propiedades de manera independiente para los 
-    elementos que conforman la grid */
+  /* Estas dos propiedades son usadas para cambiar la alineación de los elementos de manera independiente,  es decir, las propiedades del contenedor grid para alinear afectan a todos los elementos pero con estas propiedades podemos cambiar esas propiedades de manera independiente para los elementos que conforman la grid */
   justify-self: stretch;
   /* Alineación horizontal */
   align-self: stretch;
@@ -237,7 +228,7 @@ Dentro de CSS Grid al igual que en Flexbox podemos utilizar las propiedades de a
 }
 ```
 
-
+<br />
 ## Posicionamiento de Tracks
 
 El posicionamiento de tracks al igual que el posicionamiento de los elementos se utiliza son propiedades que se utilizan para alinear los elementos que forman parte de nuestro Grid, sin embargo a diferencia del posicionamiento de elementos que es empleado para alinear los elementos directamente que conforman las filas y columnas cuando estas no ocupan todo el ancho y alto que les corresponde, el posicionamiento de Tracks es utilizado para alinear y justificar los elementos dentro de los elementos que conforman las filas y columnas, es decir, no se usa para alinear filas y columnas, se usa para alinear los elementos dentro de las filas y las columnas. A continuación se muestra un ejemplo del uso de estas propiedades:
@@ -250,27 +241,22 @@ El posicionamiento de tracks al igual que el posicionamiento de los elementos se
   grid-template-columns: repeat(3, 150px);
   grid-template-rows: repeat(3, 150px);
 
-  /* Estas propiedades se usan principalmente cuando nuestros elementos no ocupan ni el ancho
-    ni el alto de nuestro contenedor */
+  /* Estas propiedades se usan principalmente cuando nuestros elementos no ocupan ni el ancho ni el alto de nuestro contenedor */
 
   justify-content: space-evenly;
-  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid
-    no dentro del espacio que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos
-    esta propiedad en flex-box. Esta propiedad alinea de manera horizontal */
+  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid no dentro del espacio que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos esta propiedad en flex-box. Esta propiedad alinea de manera horizontal */
 
   align-content: space-evenly;
-  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid
-    no dentro del espacio  que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos
-    esta propiedad en flex-box. Esta propiedad alinea de manera vertical */
+  /* Esta propiedad nos permite alinear los elementos pero dentro de la grid no dentro del espacio  que le corresponde. Esta propiedad tiene los mismos elementos que cuando usamos esta propiedad en flex-box. Esta propiedad alinea de manera vertical */
 }
 ```
 
-
-## Grid Implicita
+<br />
+## Grid Implícita
 
 Hasta el momento las propiedades y herramientas exploradas de CSS Grid corresponden con lo que conocemos como la Grid Explicita, es decir, una forma fija de definir nuestras Grids, sin embarga también contamos con herramientas que conforman lo que conocemos como Grid Implícita, donde definimos de forma dinámica de definir nuestras Grids. 
 
-Cuando trabajamos con la Grid Implícita, estamos trabajando con los elementos que no entraron en nuestra Grid Explicita, es decir, supongamos que tenemos una Grid de 3x3 con un ancho de 1fr y un alto de 150px, pero en el contenedor ponemos 11 elementos, estarán quedando 2 elementos fuera de nuestra Grid, elementos los cuales se posicionaran en una nueva fila, ocupando el ancho de los elementos de la Grid Explicita pero solo el alto que necesite.
+Cuando trabajamos con la Grid Implícita, estamos trabajando con los elementos que no entraron en nuestra Grid Explicita, es decir, supongamos que tenemos una Grid de *3x3* con un ancho de *1fr* y un alto de *150px*, pero en el contenedor ponemos 11 elementos, estarán quedando 2 elementos fuera de nuestra Grid, elementos los cuales se posicionaran en una nueva fila, ocupando el ancho de los elementos de la Grid Explicita pero solo el alto que necesite.
 
 Para trabajar con estos elementos de la Grid Implícita contamos con las siguientes propiedades:
 
@@ -305,8 +291,7 @@ A continuación se muestra un ejemplo completo del trabajo con la Grid Implícit
   /*! Utilizar este valor de dense en dicho flujo */
 
   /* grid-auto-columns: 1fr; */
-  /* Actualizamos el ancho de los elementos de la grid, esto solo
-    funciona cuando el flow (flujo de la grid) es en columna */
+  /* Actualizamos el ancho de los elementos de la grid, esto solo funciona cuando el flow (flujo de la grid) es en columna */
   grid-auto-rows: 150px;
   /* Actualizamos el alto de los elementos de la grid implícita */
 }
@@ -322,10 +307,10 @@ A continuación se muestra un ejemplo completo del trabajo con la Grid Implícit
 }
 ```
 
-
+<br />
 ## Auto Fill y Auto Fit
 
-Los valores auto fill y auto fit son sumamente utilizadas para trabajar con Grids Implícitas, ya que estos nos ayudan a definir una Grid totalmente Implícita, sin depender de tener una Grid Explicita inicial, para utilizamos estos valores en las propiedades de grid-template-columns y grid-template-rows. El valor auto fill lo que hace es que va a rellenar nuestra fila con todas las columnas o filas que pueda dependiendo el flujo de la Grid, y cuando ya no quepan mas las va a desbordar en una nueva fila o columna. Por su parte el valor auto fit también resuelve el problema del desbordamiento pero no genera columnas ni filas implícitas.
+Los valores auto fill y auto fit son sumamente utilizadas para trabajar con Grids Implícitas, ya que estos nos ayudan a definir una Grid totalmente Implícita, sin depender de tener una Grid Explicita inicial, para utilizamos estos valores en las propiedades de `grid-template-columns` y `grid-template-rows`. El valor `auto fill` lo que hace es que va a rellenar nuestra fila con todas las columnas o filas que pueda dependiendo el flujo de la Grid, y cuando ya no quepan mas las va a desbordar en una nueva fila o columna. Por su parte el valor `auto fit` también resuelve el problema del desbordamiento pero no genera columnas ni filas implícitas.
 
 A continuación un ejemplo del uso de estos valores:
 
@@ -348,7 +333,7 @@ A continuación un ejemplo del uso de estos valores:
 }
 ```
 
-
+<br />
 ## CSS Subgrid
 
 CSS Subgrid es una funcionalidad avanzada de CSS Grid, la cual nos permite definir a un contenedor secundario (hijo) que herede y se alinee con la estructura de la cuadricula de su contenedor principal (padre). Esto permite que los elementos anidados mantengan una alineación coherente con la cuadricula de su antecesor sin necesidad de definir una nueva Grid independiente.

@@ -7,6 +7,6 @@ export const dateFormat = (date: Date | string): string => {
     day: '2-digit',
   };
 
-  const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(dateToFormat);
+  const formattedDate = new Intl.DateTimeFormat('es-MX', options).format(dateToFormat);
   return formattedDate;
 }
