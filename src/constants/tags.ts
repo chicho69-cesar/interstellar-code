@@ -3,6 +3,7 @@
 import CSS from '@/icons/tech/CSS.astro'
 import Docker from '@/icons/tech/Docker.astro'
 import Express from '@/icons/tech/Express.astro'
+import HTML from '@/icons/tech/HTML.astro'
 // import Flask from '@/icons/tech/Flask.astro'
 import JavaScript from '@/icons/tech/JavaScript.astro'
 // import MongoDB from '@/icons/tech/MongoDB.astro'
@@ -72,6 +73,11 @@ export const TAGS: any = {
   //   class: 'bg-[#003159] text-white',
   //   icon: Tailwind,
   // },
+  HTML: {
+    name: 'HTML',
+    class: 'bg-[#e34c26aa] text-white',
+    icon: HTML,
+  },
   CSS: {
     name: 'CSS',
     class: 'bg-[#66339966] text-white',

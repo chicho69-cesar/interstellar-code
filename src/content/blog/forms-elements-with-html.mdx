@@ -1,0 +1,162 @@
+---
+title: Elementos de formularios con HTML
+description: Aprendemos a utilizar todos los elementos de HTML que nos ayudan a crear formularios accesibles y funcionales en HTML.
+date: 2025-06-07
+tags: [HTML]
+slug: forms-elements-with-html
+---
+
+# Elementos de formularios con HTML
+
+Los formularios son probablemente los elementos más importantes de una página web, y por ende del lenguaje HTML, mediante estos elementos podemos construir formularios para recolectar información por parte de los usuarios para darle interactividad y funcionamiento a nuestros sitios web.
+
+Existen una gran cantidad de elementos que podemos utilizar para crear formularios, y cada uno de ellos tiene un propósito específico. A continuación, veremos los más comunes y cómo utilizarlos.
+
+<br />
+## Etiqueta `<form>`
+
+La etiqueta `<form>` es el contenedor principal de un formulario. Dentro de esta etiqueta, podemos incluir otros elementos como campos de entrada, botones y etiquetas. La estructura básica de un formulario es la siguiente:
+
+```html
+<form action="/submit" method="POST" target="_self" autocomplete="on">
+  <!-- ... -->
+</form>
+```
+
+La etiqueta `<form>` tiene una serie de atributos que nos ayudan a definir el comportamiento del mismo formulario, entre los más importantes están:
+
+- **action**: Define la URL a la que se enviarán los datos del formulario cuando se envíe.
+- **method**: Define el método HTTP que se utilizará para enviar los datos del formulario. Los valores más comunes son `GET` y `POST`.
+- **target**: Define dónde se mostrarán los resultados del envío del formulario. Los valores más comunes son `_self` (mismo marco) y `_blank` (nuevo marco).
+- **autocomplete**: Indica si el navegador debe autocompletar los campos del formulario. Los valores pueden ser `on` o `off`.
+
+<br />
+## Etiqueta `<input>`
+
+La etiqueta `<input>` es uno de los elementos más utilizados en los formularios. Se utiliza para crear campos de entrada donde los usuarios pueden ingresar datos. La etiqueta `<input>` tiene un atributo `type` que define el tipo de campo de entrada que se creará. Algunos de los tipos más comunes son:
+
+- **text**: Muestra un campo de texto de una sola línea.
+- **password**: Campo de texto para contraseñas, oculta el texto que es ingresado por el usuario.
+- **email**: Define un campo de texto para direcciones de correo electrónico, además nos permite validar el formato del correo de forma nativa en el navegador.
+- **url**: Campo de texto para URLs, también valida el formato de la URL.
+- **tel**: Campo de texto para números de teléfono, permite ingresar números de teléfono con formato.
+- **date**: Campo de texto para seleccionar una fecha, muestra un selector de fecha en navegadores compatibles.
+- **datetime-local**: Campo de texto para seleccionar una fecha y hora local.
+- **time**: Campo de texto para seleccionar una hora.
+- **number**: Campo de texto para números.
+- **checkbox**: Casilla de verificación, permite seleccionar o deeleccionar una opción.
+- **radio**: Botón de opción, permite seleccionar una opción entre varias.
+- **file**: Campo de entrada para subir archivos.
+- **submit**: Botón para enviar el formulario.
+- **reset**: Botón para restablecer los valores del formulario.
+- **hidden**: Campo oculto, no es visible para el usuario pero se envía con el formulario.
+- **search**: Campo de texto para búsquedas, similar a `text` pero con un estilo diferente en algunos navegadores.
+- **color**: Campo de texto para seleccionar un color, muestra un selector de color en navegadores compatibles.
+- **range**: Campo de texto para seleccionar un valor dentro de un rango, muestra un control deslizante en navegadores compatibles.
+
+```html
+<form action="" method="post">
+  <input type="text" name="nombre" id="nombre" placeholder="Nombre: " />
+  <input type="password" name="password" id="password" placeholder="Contraseña: " />
+  <input type="email" name="email" id="email" placeholder="E-Mail: " />
+  <input type="number" name="edad" id="edad" placeholder="Edad: " />
+  <input type="search" name="buscar" id="buscar" placeholder="Buscar: " />
+  <input type="tel" name="phone" id="phone" placeholder="Teléfono: " />
+
+  <input type="radio" name="answer" id="Yes" /> Yes
+  <input type="radio" name="answer" id="No" /> No
+
+  <input type="checkbox" name="language" id="Java" /> Java
+  <input type="checkbox" name="language" id="Python" /> Python
+  <input type="checkbox" name="language" id="C#" /> C#
+
+  <input type="color" name="color" id="color" />
+
+  <input type="button" value="Botón" />
+  <input type="submit" value="Submit" />
+  <input type="reset" value="Reset" />
+
+  <input type="file" name="file" id="file" />
+
+  <input type="image" src="img/logo.png" alt="Logo">
+
+  <input type="url" name="url" id="url" placeholder="url: " />
+
+  <input type="date" name="date" id="date" />
+  <input type="time" name="time" id="time" />
+  <input type="datetime-local" name="datetime" id="datetime" />
+  <input type="week" name="week" id="week" />
+  <input type="month" name="month" id="month" />
+
+  <input type="range" name="range" id="range" />
+</form>
+```
+
+Además del tipo de campo de la etiqueta `<input>`, también podemos utilizar otros atributos para mejorar la accesibilidad y la experiencia del usuario, algunos de los más comunes y utilizados son:
+
+- **name**: Define el nombre del campo de entrada, que se enviará junto con los datos del formulario.
+- **id**: Define un identificador único para el campo de entrada, que se puede utilizar para asociar una etiqueta `<label>` con el campo.
+- **placeholder**: Muestra un texto de ejemplo dentro del campo de entrada cuando está vacío.
+- **value**: Define el valor predeterminado del campo de entrada.
+- **required**: Indica que el campo de entrada es obligatorio y debe ser completado antes de enviar el formulario.
+- **disabled**: Desactiva el campo de entrada, impidiendo que el usuario interactúe con él.
+
+<br />
+## Etiqueta `<label>`
+
+La etiqueta `<label>` se utiliza para asociar una etiqueta de texto con un campo de entrada. Esto mejora la accesibilidad y la usabilidad del formulario, ya que permite a los usuarios hacer clic en la etiqueta para enfocar el campo de entrada correspondiente. Para asociar una etiqueta `<label>` con un campo de entrada, se utiliza el atributo `for`, que debe coincidir con el `id` del campo de entrada.
+
+```html
+<label for="nombre">Nombre:</label>
+<input type="text" name="nombre" id="nombre" placeholder="Nombre: " />
+<label for="email">E-Mail:</label>
+<input type="email" name="email" id="email" placeholder="E-Mail: " />
+<label for="password">Contraseña:</label>
+<input type="password" name="password" id="password" placeholder="Contraseña: " />
+```
+
+<br />
+## Etiqueta `<textarea>`
+
+La etiqueta `<textarea>` se utiliza para crear un campo de entrada de texto de varias líneas. Es útil para permitir que los usuarios ingresen texto más largo, como comentarios o descripciones. La etiqueta `<textarea>` no tiene un atributo `type`, ya que siempre crea un campo de texto de varias líneas.
+
+```html
+<textarea name="comentarios" id="comentarios" rows="4" cols="50" placeholder="Escribe tus comentarios aquí..."></textarea>
+```
+
+La etiqueta `<textarea>` también tiene algunos atributos útiles:
+
+- **rows**: Define el número de filas visibles en el campo de texto.
+- **cols**: Define el número de columnas visibles en el campo de texto.
+- **maxlength**: Define el número máximo de caracteres que se pueden ingresar en el campo de texto.
+
+<br />
+## Etiqueta `<select>`
+
+La etiqueta `<select>` se utiliza para crear un menú desplegable que permite a los usuarios seleccionar una opción de una lista. Dentro de la etiqueta `<select>`, se utilizan las etiquetas `<option>` para definir las opciones disponibles.
+
+```html
+<select name="languages" id="languages">
+  <option value="JavaScript">JavaScript</option>
+  <option value="Python">Python</option>
+  <option value="Java">Java</option>
+  <option value="C#">C#</option>
+  <option value="TypeScript">TypeScript</option>
+</select>
+```
+
+La etiqueta `<select>` también tiene algunos atributos útiles:
+
+- **multiple**: Permite seleccionar múltiples opciones del menú desplegable.
+- **size**: Define el número de opciones visibles en el menú desplegable sin necesidad de desplazamiento.
+
+<br />
+## Etiqueta `<button>`
+
+La etiqueta `<button>` se utiliza para crear botones dentro de un formulario. Los botones pueden tener diferentes tipos, como `submit`, `reset` o `button`. El tipo predeterminado es `submit`, que envía el formulario cuando se hace clic en el botón.
+
+```html
+<button type="submit">Enviar</button>
+<button type="reset">Restablecer</button>
+<button type="button">Botón</button>
+```
