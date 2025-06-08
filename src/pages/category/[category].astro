@@ -6,7 +6,9 @@ import PostCard from "@/components/posts/PostCard.astro";
 import Layout from "@/layouts/Layout.astro";
 
 export const getStaticPaths = (async () => {
-  const posts = await getCollection("blog");
+  const posts = await getCollection("blog", ({ data }) => {
+    return data.isDraft !== true
+  });
 
   const tags = posts
     .flatMap((post) => post.data.tags || [])

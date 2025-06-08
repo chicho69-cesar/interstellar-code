@@ -1,0 +1,154 @@
+---
+title: Elementos semánticos de HTML
+description: Los elementos semánticos de HTML son conceptos fundamentales para crear una estructura clara y accesible en nuestras páginas web.
+date: 2025-06-07
+tags: [HTML]
+slug: semantic-html-tags
+isDraft: false
+---
+
+# Elementos semánticos de HTML
+
+Los elementos semánticos de HTML son conceptos fundamentales para crear una estructura clara y accesible en nuestras páginas web. Estos elementos no solo ayudan a los navegadores a interpretar el contenido, sino que también mejoran la accesibilidad para usuarios con discapacidades y optimizan el SEO.
+
+<br />
+## Etiqueta `<header>`
+
+**¿Qué es?**: Representa el encabezado de una página completa o de una sección específica. Generalmente incluye títulos, logotipos, menús, o encabezados introductorios.
+
+Se suele utilizar en la parte superior de la página, o en el encabezado de un `<article>` o `<section>`.
+
+```html
+<header>
+  <h1>Mi Blog Personal</h1>
+
+  <nav>
+    <a href="/">Inicio</a>
+    <a href="/acerca">Acerca</a>
+  </nav>
+</header>
+```
+
+<br />
+## Etiqueta `<nav>`
+
+**¿Qué es?**: Define una sección de navegación en la página. Se utiliza para agrupar enlaces de navegación que ayudan a los usuarios a moverse por el sitio. 
+
+Se suele utilizar para menús de navegación principales, barras laterales o pie de página.
+
+```html
+<nav>
+  <ul>
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+```
+
+<br />
+## Etiqueta `<main>`
+
+**¿Qué es?**: Representa el contenido principal de un documento. Debe ser único por página y no debe incluir contenido repetitivo como encabezados, pies de página o barras laterales.
+
+```html
+<main>
+  <article>
+    <h2>¿Por qué aprender HTML?</h2>
+    <p>HTML es el lenguaje base para crear sitios web...</p>
+  </article>
+</main>
+```
+
+<br />
+## Etiqueta `<section>`
+
+**¿Qué es?**: Define una sección temática dentro de un documento. Se utiliza para agrupar contenido relacionado, como capítulos, secciones o grupos de contenido.
+
+```html
+<section>
+  <h2>Servicios</h2>
+  <p>Ofrecemos desarrollo web, diseño UX/UI, y más.</p>
+</section>
+```
+
+<br />
+## Etiqueta `<article>`
+
+**¿Qué es?**: Representa un contenido independiente que puede ser distribuido o reutilizado de forma independiente, como un artículo de blog, una noticia o un comentario.
+
+Se suele utilizar para publicaciones de blog, artículos de noticias o comentarios en foros.
+
+```html
+<article>
+  <h2>Cómo empezar con React</h2>
+  <p>React es una biblioteca de JavaScript para construir interfaces...</p>
+</article>
+```
+
+<br />
+## Etiqueta `<aside>`
+
+**¿Qué es?**: Representa contenido relacionado indirectamente con el contenido principal, como barras laterales, notas al margen o enlaces relacionados.
+
+```html
+<aside>
+  <h3>Autor</h3>
+  <p>Juan Pérez es desarrollador web desde 2015.</p>
+</aside>
+```
+
+<br />
+## Etiqueta `<footer>`
+
+**¿Qué es?**: Define el pie de página de un documento o sección. Generalmente incluye información de contacto, derechos de autor, enlaces a políticas de privacidad, etc.
+
+Se suele utilizar al final de la página o al final de un `<article>` o `<section>`.
+
+```html
+<footer>
+  <p>© 2025 Mi Blog. Todos los derechos reservados.</p>
+</footer>
+```
+
+<br />
+## Etiqueta `<figure>` y `<figcaption>`
+
+**¿Qué es?**: La etiqueta `<figure>` se utiliza para encapsular contenido independiente, como imágenes, gráficos o diagramas, y la etiqueta `<figcaption>` proporciona una leyenda o descripción para ese contenido.
+
+```html
+<figure>
+  <img src="graphic.png" alt="Crecimiento de usuarios" />
+  <figcaption>Gráfico 1: Usuarios activos por mes</figcaption>
+</figure>
+```
+
+<br />
+## Etiqueta `<time>`
+
+**¿Qué es?**: Representa una fecha o una hora. Facilita que navegadores y motores de búsqueda identifiquen eventos cronológicos.
+
+```html
+<p>Publicado el <time datetime="2025-06-07">7 de junio de 2025</time></p>
+```
+
+<br />
+## Etiqueta `<mark>`
+
+**¿Qué es?**: Se utiliza para resaltar texto que es relevante o importante dentro del contexto del documento. Es útil para destacar términos clave o resultados de búsqueda.
+
+```html
+<p>El curso más popular es <mark>HTML desde cero</mark>.</p>
+```
+
+<br />
+## Etiqueta `<address>`
+
+**¿Qué es?**: Representa información de contacto del autor o propietario del documento. Puede incluir direcciones físicas, correos electrónicos o números de teléfono.
+
+```html
+<address>
+  Contacto: <a href="mailto:juan@ejemplo.com">juan@ejemplo.com</a><br>
+  Calle 123, Ciudad, País
+</address>
+```
