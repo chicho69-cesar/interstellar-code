@@ -1,0 +1,93 @@
+---
+title: Configuración de pruebas con Jest en React
+description: Aprende a configurar Jest para realizar pruebas en aplicaciones React, incluyendo la instalación, configuración de archivos y ejemplos de pruebas unitarias.
+date: 2025-06-16
+tags: [React, JavaScript]
+slug: setup-jest-test-on-react
+isDraft: false
+---
+
+# Configuración de pruebas con Jest en React
+
+Para configurar un proyecto de React con Jest y crear pruebas unitarias en nuestros componentes, podemos hacerlos siguiendo estos pasos:
+
+## Instalaciones
+
+**Dependencias de Jest y Babel**
+
+```bash
+npm install -ED jest babel-jest @babel/preset-env @babel/preset-react @types/jest jest-environment-jsdom
+```
+
+**Dependencias de Testing Library**
+
+```bash
+npm install -ED @testing-library/react
+```
+
+**Dependencias de Fetch Mock (opcional)**
+
+```bash
+npm install -ED whatwg-fetch
+```
+
+## Configuración de archivos
+
+**Creamos un archivo `babel.config.cjs`**
+
+```javascript
+module.exports = {
+  presets: [
+    ['@babel/preset-env', { targets: { esmodules: true } }],
+    ['@babel/preset-react', { runtime: 'automatic' }],
+  ],
+}
+```
+
+**Creamos un archivo `jest.config.cjs`**
+
+```javascript
+module.exports = {
+  testEnvironment: 'jest-environment-jsdom',
+  setupFiles: ['./jest.setup.js']
+}
+```
+
+**Creamos un archivo `jest.setup.js`**
+
+```javascript
+import 'whatwg-fetch'
+```
+
+**Configuramos jest en `jsconfig.json`**
+
+```json
+{
+  "typeAcquisition": {
+    "include": [
+      "jest"
+    ]
+  }
+}
+```
+
+## Ejemplo de prueba unitaria
+
+Un ejemplo de una prueba unitaria de un componente `HelloWorldApp.jsx` podría ser la siguiente:
+
+```javascript
+/* eslint-disable no-undef */
+import { render } from '@testing-library/react'
+import { HelloWorldApp } from '../src/HelloWorldApp'
+
+describe('Test on <HelloWorldApp />', () => {
+  test('should show "Hola Mundo!!!" in the h1', () => {
+    const title = 'Hola Mundo!!!'
+    const { findByRole } = render(<HelloWorldApp />)
+
+    findByRole('heading', { level: 1 }).then((h1) => {
+      expect(h1.innerHTML).toContain(title)
+    })
+  })
+})
+```
