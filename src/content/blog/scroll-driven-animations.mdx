@@ -1,0 +1,159 @@
+---
+title: Scroll Driven Animations
+description: Aprende a implementar animaciones a través del scroll en tus aplicaciones web para una experiencia de usuario más dinámica y atractiva.
+date: 2025-06-14
+tags: [CSS]
+slug: scroll-driven-animations
+isDraft: false
+---
+
+# Scroll Driven Animations
+
+Las scroll driven animations o animaciones a través del scroll, son una nueva forma de hacer animaciones utilizando CSS, estas se logran creando animaciones que en lugar de usar el tiempo como parámetro, utilizan el scroll del usuario. Esto permite que las animaciones se sincronicen con el desplazamiento de la página, creando una experiencia más fluida y natural.
+
+Para lograr esto, se utiliza la propiedad `animation-timeline`, la cual tiene varios posibles, entre ellos los siguientes:
+
+- **scroll(item direction)**: Esta función nos permite definir que una animación se ejecutara siguiendo el scroll del elemento `item` en una determinada dirección, ya sea `block` para vertical o `inline` para horizontal.
+- **view()**: Esta función nos permite definir que una animación se ejecutara siguiendo el scroll de la ventana del navegador, es decir, el viewport.
+
+<br />
+## Ejemplo número 1
+
+Imaginemos que queremos crear una barra de progreso que se mueva a medida que el usuario hace scroll en la página. 
+
+```html
+<div id="progress"></div>
+```
+
+```css
+#progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 5px;
+  background-color: red;
+
+  /* Usamos la animación progress-grow sin definir el tiempo que tardara, simplemente con auto para que sea automática */
+  animation: progress-grow auto linear;
+  /* Usamos una animación a través del scroll del elemento root en dirección vertical */
+  animation-timeline: scroll(root block);
+}
+
+@keyframes progress-grow {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+```
+
+<br />
+## Ejemplo número 2
+
+Ahora, imaginemos que queremos hacer un header animado el cual se quede pegado arriba de nuestra web cuando hacemos scroll con una animación suave y cambiando el diseño del mismo.
+
+```html
+<header id="header">
+  <h1>Mi Sitio Web</h1>
+</header>
+```
+
+```css
+#header {
+  background-color: black;
+  color: white;
+  padding: 16px;
+  margin: 0;
+  text-align: center;
+  font-size: 32px;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+
+  animation: enhance-header both linear;
+  /* La función de scroll tiene como segundo valor por defecto block */
+  animation-timeline: scroll(root);
+  /* Con la propiedad range definimos el rango que durara la animación, en este caso de 0 a 200px de scroll, porque sino la animación tardaría todo lo que dure el scroll de toda la pagina */
+  animation-range: 0 200px;
+}
+
+@keyframes enhance-header {
+  to {
+    background-color: rgb(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    font-size: 24px;
+    color: black;
+  }
+}
+```
+
+<br />
+## Ejemplo número 3
+
+Por ultimo, supongamos que queremos hacer una galería de imágenes donde queremos que los elementos de la galería se vayan mostrando de forma animada conforme van entrando al viewport del usuario.
+
+```html
+<main>
+  <section class="gallery">
+    <img src="https://images.unsplash.com/photo-1744137285276-57ca4048f805?q=80&w=1376&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1586264508495-d10fbde7360a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDR8eEh4WVRNSExnT2N8fGVufDB8fHx8fA%3D%3D" alt="">
+
+    <img src="https://images.unsplash.com/photo-1715904399522-6b82d02c09a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8eEh4WVRNSExnT2N8fGVufDB8fHx8fA%3D%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1738529550483-c08d27b6b839?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDZ8eEh4WVRNSExnT2N8fGVufDB8fHx8fA%3D%3D" alt="">
+
+    <img src="https://images.unsplash.com/photo-1749406113759-c98346444f60?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDE2fHhIeFlUTUhMZ09jfHxlbnwwfHx8fHw%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1749302859649-d919c7d01021?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDIwfGhtZW52UWhVbXhNfHxlbnwwfHx8fHw%3D" alt="">
+
+    <img src="https://plus.unsplash.com/premium_photo-1692049122940-9ed87ceee9a4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8RnpvM3p1T0hONnd8fGVufDB8fHx8fA%3D%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1749569338802-29bec39cb5d4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDh8RnpvM3p1T0hONnd8fGVufDB8fHx8fA%3D%3D" alt="">
+
+    <img src="https://plus.unsplash.com/premium_photo-1724078321581-63532f24b207?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDEzfEZ6bzN6dU9ITjZ3fHxlbnwwfHx8fHw%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDIwfEZ6bzN6dU9ITjZ3fHxlbnwwfHx8fHw%3D" alt="">
+
+    <img src="https://plus.unsplash.com/premium_photo-1709310749319-6a0922524ebd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDI1fEZ6bzN6dU9ITjZ3fHxlbnwwfHx8fHw%3D" alt="">
+    
+    <img src="https://images.unsplash.com/photo-1748969068126-b4ff7a7fa8c5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDMyfEZ6bzN6dU9ITjZ3fHxlbnwwfHx8fHw%3D" alt="">
+  </section>
+</main>
+```
+
+```css
+section {
+  width: 100%;
+  columns: 2;
+  column-gap: 16px;
+  margin: 50px auto 100px;
+}
+
+section img {
+  width: 100%;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  height: auto;
+
+  animation: reveal linear both;
+  /* La función view como lo mencionamos anteriormente funciona para disparar la animación cuando el elemento entra al viewport */
+  animation-timeline: view();
+  /* Dentro del rango para cuando usamos el viewport, podemos especificamos en que porcentaje de entrada en el viewport comienza la animación, y en que porcentaje termina, por ejemplo, aquí la animación comienza cuando el elemento ya entro un 15% y termina cuando entra un 35%. */
+  animation-range: entry 15% cover 35%;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 50px;
+    scale: 0.5;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+```
