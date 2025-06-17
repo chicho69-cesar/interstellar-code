@@ -25,10 +25,17 @@ npm install -ED jest babel-jest @babel/preset-env @babel/preset-react @types/jes
 npm install -ED @testing-library/react
 ```
 
-**Dependencias de Fetch Mock (opcional)**
+**Dependencias opcionales para la configuración de nuestro archivo `jest.setup.js`**
 
 ```bash
+# Para manejar fetch en pruebas
 npm install -ED whatwg-fetch
+# Para manejar TextEncoder y TextDecoder si usamos React Router
+npm install -ED util
+# Para manejar setImmediate en pruebas
+npm install -ED setimmediate
+# Si usamos variables de entorno en pruebas
+npm install -ED dotenv
 ```
 
 ## Configuración de archivos
@@ -49,14 +56,43 @@ module.exports = {
 ```javascript
 module.exports = {
   testEnvironment: 'jest-environment-jsdom',
-  setupFiles: ['./jest.setup.js']
+  setupFiles: ['./jest.setup.js'],
+  transformIgnorePatterns: [],
+    
+  // ModuleNameMapper sólo si ocupamos importar CSS en nuestros componentes para el testing
+  moduleNameMapper: {
+    '\\.(css|less|sass)$': '<rootDir>/tests/mocks/styleMock.js',
+  },
 }
+```
+
+Si usamos CSS en nuestros componentes, debemos crear un mock para los estilos. Creamos un archivo `tests/mocks/styleMock.js`:
+
+```javascript
+module.exports = {}
 ```
 
 **Creamos un archivo `jest.setup.js`**
 
 ```javascript
 import 'whatwg-fetch'
+import 'setimmediate'
+
+import { TextEncoder, TextDecoder } from 'util'
+
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
+// Si usamos variables de entorno en pruebas
+import dotenv from 'dotenv'
+dotenv.config({
+  path: '.env.test'
+})
+
+// Si usamos variables de entorno en pruebas, podemos crear un mock para obtenerlas
+jest.mock('./src/helpers/getEnvVariables', () => ({
+  getEnvVariables: () => ({ ...process.env })
+}))
 ```
 
 **Configuramos jest en `jsconfig.json`**
