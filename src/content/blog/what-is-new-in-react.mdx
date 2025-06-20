@@ -1,0 +1,220 @@
+---
+title: Novedades en React 19
+description: Descubre las últimas características y mejoras en React 19, la versión más reciente de React, la cual está revolucionando el desarrollo web moderno.
+date: 2025-06-20
+tags: [JavaScript, React]
+slug: what-is-new-in-react
+isDraft: false
+---
+
+# Novedades en React
+
+React no para de evolucionar, y con la nueva versión 19, se han añadido una serie de nuevas características que nos van a ayudar enormemente a mejorar la experiencia de desarrollo y el rendimiento y funcionalidad de nuestras aplicaciones.
+
+Algunas de estas nuevas características las exploramos en este post, junto a una serie de ejemplos para comprender como implementar de una forma sencilla y práctica estas nuevas características.
+
+<br />
+## La nueva API `use`
+
+La nueva API `use` es muy parecida a los hooks, pero no es un hook, esta es una API que usamos para obtener un recurso, por ejemplo, el resultado de una tarea asíncrona, el valor de un contexto, etc.
+Por ejemplo, si queremos usar una función asíncrona para obtener información de un endpoint debemos de pasar le la función por props al componente, usar dicha función dentro de un `use` y al llamar dicho componente envolverlo dentro de un `Suspense`.
+
+```tsx
+import { use, Suspense } from 'react';
+
+interface Props {
+  getPlanets: () => Promise<string[]>;
+}
+
+const Planets: React.FC<Props> = ({ getPlanets }) => {
+  const planets = use(getPlanets);
+}
+
+const App = () => {
+  const getPlanets = async () => {
+    const response = await fetch('https://swapi.dev/api/planets');
+    const data = await response.json();
+    return data.results;
+  }
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Planets getPlanets={getPlanets()} />
+    </Suspense>
+  )
+}
+```
+
+Cuando tenemos un componente como el anterior que utiliza una función asíncrona para obtener datos, es posible que dicha función lance una excepción, por lo que debemos de atrapar este error y mostrar feedback al usuario de que algo salio mal, esto hacemos usando un `ErrorBoundary`, el cual sera un class base component como el siguiente:
+
+```tsx
+import * as React from 'react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    logErrorToMyService(
+      error,
+      info.componentStack,
+      React.captureOwnerStack(),
+    );
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+```	
+
+Para usarlo debemos de envolver nuestro componente `Suspense` dentro de un `ErrorBoundary` y pasar le el fallback que queremos mostrar cuando ocurra un error.
+
+```tsx
+<ErrorBoundary fallback={<div>Error al cargar los planetas</div>}>
+  <Suspense fallback={<div>Loading...</div>}>
+    <Planets getPlanets={getPlanets} />
+  </Suspense>
+</ErrorBoundary>
+```
+
+<br />
+## El nuevo hook `useActionState`
+
+El nuevo hook `useActionState` nos permite controlar la acción de un formulario, pasando del manejo de formularios controlados por el estado a formularios controlados por acciones. La sintaxis para usar este nuevo hook es la siguiente:
+
+```tsx
+import { useActionState } from 'react';
+
+interface State {
+  value: string;
+  error: string;
+}
+
+const initialState: State = {
+  value: '',
+  error: ''
+}
+
+const [state, formAction, isPending] = useActionState(
+  async (state: State, formData: FormData) => {
+    const value = formData.get('value');
+    const data = Object.fromEntries(formData);
+  },
+  initialState
+)
+
+<form action={formAction} method="post">
+  <input type="text" name="value" />
+  <button type="submit">Submit</button>
+</form>
+```
+
+<br />
+## El nuevo hook `useFormStatus`
+
+Otro nuevo hook que es muy util combinándolo con el anterior es `useFormStatus`, el cual nos ayuda mucho a verificar el estado de un formulario, como por ejemplo validar si esta haciendo posting de una acción o si esta cargando.
+
+```tsx
+import { useFormStatus } from 'react';
+
+const status = useFormStatus();
+const { pending, data, method, action } = status;
+```
+
+<br />
+## El nuevo hook `useOptimistic` y `useTransition`
+
+Existen otros dos nuevos hooks los cuales son `useOptimistic` y `useTransition`, estos dos nuevos hooks se suelen utilizar para hacer cambios optimistas en la UI, por ejemplo, si le damos like a una publicación en una red social vamos a querer que el cambio se realice inmediatamente en la UI y después hacer la petición al servidor para sincronizar el cambio, si esta petición falla podemos hacer rollback del cambio en la UI, pero si no falla el usuario vera el cambio sumamente rápido, lo cual dará una sensación de que la aplicación es muy rápida.
+
+```tsx
+import { useOptimistic, useTransition } from 'react';
+
+const [isPending, startTransition] = useTransition();
+const [optimisticData, setOptimisticData] = useOptimistic(
+  initialData,
+  (currentData, newDataItem) => {
+    return currentData.map((item) => {
+      if (item.id === newDataItem.id) {
+        return newDataItem;
+      }
+
+      return item;
+    });
+  }
+)
+
+const handleUpdate = async (data) => {
+  startTransition(async () => {
+    const dataToUpdate = {
+      ...data,
+      likes: data.likes + 1
+    }
+
+    try {
+      setOptimisticData(dataToUpdate);
+      const updatedData = await updateData(dataToUpdate);
+      setOptimisticData(updatedData);
+    } catch (error) {
+      setOptimisticData(data);
+    }
+  });
+}
+```
+
+<br />
+## Document Metadata API
+
+La nueva API de metadatos es una nueva característica introducida en React 19, esta nos va a permitir hacer cambios en la metadata de un documento, como por ejemplo manejar las etiquetas `title`, `meta`, `link`, etc. Esto directamente desde los componentes de React, sin la necesidad de hacer cosas raras como efectos o utilizar librerías externas.
+
+Además otra de las características importantes de esta nueva API es que vamos a poder hacer carga asíncrona de recursos, como por ejemplo cargar estilos css desde un componente, y dichos estilos no se van a cargar hasta que el componente se renderice en el DOM, y además se van a cargar de forma asíncrona.
+
+```tsx
+export function Component({ title, description }) {
+  return (
+    <>
+      <title>{`${title} - ${description}`}</title>
+      <meta name="description" content={description} />
+
+      <link rel="stylesheet" href='./styles.css' />
+    </>
+  )
+}
+```
+
+<br />
+## Funciones para pre cargar recursos
+
+En esta nueva versión de React también tenemos nuevas funciones muy interesantes que nos van a ayudar a hacer pre load de recursos, lo cual es muy útil cuando tenemos archivos, estilos, imagenes o fuentes que queremos cargar de forma asíncrona antes de usarlas, esto con el objetivo de mejorar la experiencia de usuario y el rendimiento de la aplicación.
+
+```tsx
+import { preload, preinit, preconnect, prefetchDNS } from 'react';
+
+export function Component() {
+  preload(
+    'https://example.com/styles.css',
+    { as: 'style', priority: 'low' }
+  );
+
+  preload(
+    'image.png',
+    { as: 'image', priority: 'high' }
+  )
+
+  preinit('https://example.com/font.woff2')
+
+  return (
+    <></>
+  )
+}
+```
