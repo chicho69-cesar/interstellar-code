@@ -38,11 +38,11 @@ const recentPosts = posts
 		</a>
 	</div>
 
-	<h2 class="font-geist text-xl text-neutral-900/90 dark:text-neutral-100/90 font-semibold mt-12">
+	<h2 class="font-geist text-xl text-neutral-900/90 dark:text-neutral-100/90 font-semibold mt-12 text-center">
 		Todas las Categorías
 	</h2>
 
-	<ul class='flex flex-row flex-wrap mt-2 gap-2 mb-6'>
+	<ul class='flex flex-row flex-wrap justify-center mt-2 gap-2 mb-6'>
     {Object.keys(TAGS).map((tag: string) => {
 			const tagData = TAGS[tag.toUpperCase()];
       const Icon = tagData?.icon || TAGS['DEFAULT'].icon;
@@ -52,7 +52,7 @@ const recentPosts = posts
         <li>
           <a
 						href={`/category/${tag.toLowerCase()}`}
-            class={`flex items-center gap-x-2 rounded-full backdrop-blur-md text-xs font-bold font-mono ${TAGS[tag.toUpperCase()].class } py-2 px-4`}
+            class={`flex items-center gap-x-2 rounded-full backdrop-blur-md text-xs font-bold font-mono ${TAGS[tag.toUpperCase()].class } py-1 px-4`}
           >
             {<Icon class='size-4' />}
             <span>{tagName}</span>

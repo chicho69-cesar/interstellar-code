@@ -3,6 +3,9 @@ import Calendar from '@/icons/general/Calendar.astro';
 import { dateFormat } from '@/lib/formatter';
 import type { CollectionEntry } from 'astro:content';
 import { TAGS } from '@/constants/tags';
+import { TECH } from '@/constants/tech';
+
+const allTags = { ...TAGS, ...TECH };
 
 interface Props {
   post: CollectionEntry<'blog'>
@@ -28,12 +31,12 @@ const { data } = post;
 
   <ul class='flex flex-row flex-wrap mt-2 gap-2'>
     {data.tags.map((tag: string) => {
-      const Icon = TAGS[tag.toUpperCase()]?.icon || TAGS['DEFAULT'].icon;
+      const Icon = allTags[tag.toUpperCase()]?.icon || allTags['DEFAULT'].icon;
       
       return (
         <li>
           <span
-            class={`flex items-center gap-x-2 rounded-full backdrop-blur-md text-xs font-bold font-mono ${TAGS[tag.toUpperCase()].class } py-1 px-3`}
+            class={`flex items-center gap-x-2 rounded-full backdrop-blur-md text-xs font-bold font-mono ${allTags[tag.toUpperCase()].class } py-1 px-3`}
           >
             {<Icon class='size-4' />}
             {tag}
