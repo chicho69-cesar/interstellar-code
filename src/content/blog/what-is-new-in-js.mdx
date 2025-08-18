@@ -9,29 +9,242 @@ isDraft: false
 
 # Novedades en JavaScript
 
+En este post vamos a estar explorando las novedades más importantes que tiene el lenguaje y especificación de JavaScript en sus versiones ES2024 y ES2025. Versiones en las cuales se han introducido características y mejoras que son increíblemente útiles para el desarrollo con este lenguaje.
+
 <br />
 ## Object.groupBy
+
+Este es un nuevo método de la clase `Object` que nos permite agrupar elementos de un array en un objeto literal en base a una `key` y a una cierta condición, por ejemplo, imaginemos que queremos agrupar los números pares e impares de un array, podemos hacerlo de la siguiente forma:
+
+```js
+const numbers = [1, 2, 3, 4, 5];
+
+const grouped = Object.groupBy(numbers, (num) => {
+  if (num % 2 === 0) return 'even'; // -> Key donde se van a agrupar los números pares
+  return 'odd'; // -> Key donde se van a agrupar los números impares
+});
+```
+
+Otro ejemplo podría ser agrupar un array de heroes por su planeta:
+
+```js
+const heroes = [
+  { name: 'Superman', planet: 'Krypton' },
+  { name: 'Batman', planet: 'Earth' },
+  { name: 'Wonder Woman', planet: 'Themyscira' },
+  { name: 'Martian Manhunter', planet: 'Mars' },
+  { name: 'Flash', planet: 'Earth' },
+  { name: 'Green Lantern', planet: 'Earth' },
+  { name: 'Aquaman', planet: 'Atlantis' },
+  { name: 'Cyborg', planet: 'Earth' },
+];
+
+const groupedHeroes = Object.groupBy(heroes, (hero) => hero.planet);
+```
+
+Otro ejemplo podría ser agrupar los mismos heroes pero en base a su nivel de poder, para esto podemos hacer uso de los `Symbol` para definir las keys del objeto:
+
+```js
+const heroes = [
+  { name: 'Superman', planet: 'Krypton', power: 650 },
+  { name: 'Batman', planet: 'Earth', power: 300 },
+  { name: 'Wonder Woman', planet: 'Themyscira', power: 450},
+  { name: 'Martian Manhunter', planet: 'Mars', power: 500 },
+  { name: 'Flash', planet: 'Earth', power: 400 },
+  { name: 'Green Lantern', planet: 'Earth', power: 550 },
+  { name: 'Aquaman', planet: 'Atlantis', power: 350 },
+  { name: 'Cyborg', planet: 'Earth', power: 300 },
+];
+
+const HUMAN_LEVEL = Symbol();
+const SUPER_HERO_LEVEL = Symbol();
+const GOD_LEVEL = Symbol();
+
+const groupedHeroes = Object.groupBy(heroes, (hero) => {
+  if (hero.power >= 500) return GOD_LEVEL; // -> Key para los heroes con nivel de poder Dios
+  if (hero.power >= 400) return SUPER_HERO_LEVEL; // -> Key para los heroes con nivel de poder Super Hero
+  return HUMAN_LEVEL; // -> Key para los heroes con nivel de poder Humano
+});
+```
+
+Aunque el método `Object.groupBy` es muy utilizado con arrays, también se puede utilizar con `Sets` por ejemplo, imaginemos que tenemos un `Set` de palabras y queremos agruparlas por las que son palindromos y las que no lo son, podemos hacerlo de la siguiente forma:
+
+```js
+const words = new Set();
+words.add('radar');
+words.add('hello');
+words.add('level');
+words.add('world');
+
+const groupedWords = Object.groupBy(words, (word) => {
+  if (word === word.split('').reverse().join('')) {
+    return 'palindrome';
+  }
+
+  return 'normal';
+})
+```
+
+El método también esta disponible en la clase `Map` y funciona de la misma forma, solo que en vez de crear un objeto literal, crea un nuevo `Map` agrupando los elementos en base a la key que le pasemos.:
+
+```js
+const inventory = [
+  { name: 'asparagus', type: 'vegetables', quantity: 9 },
+  { name: 'bananas', type: 'fruit', quantity: 5 },
+  { name: 'goat', type: 'meat', quantity: 23 },
+  { name: 'cherries', type: 'fruit', quantity: 12 },
+  { name: 'fish', type: 'meat', quantity: 22 },
+];
+
+const restock = { restock: true };
+const sufficient = { restock: false };
+
+const result = Map.groupBy(inventory, ({ quantity }) =>
+  quantity < 6 ? restock : sufficient,
+);
+
+console.log(result.get(restock));
+// [{ name: 'bananas', type: 'fruit', quantity: 5 }]
+```
 
 <br />
 ## Array.prototype.at()
 
+Este es un nuevo método de arrays que nos ayuda a acceder a un elemento del array en un indice de forma muy sencilla y rápida, este método nos regresa el elemento en el indice y si no existe regresa `undefined`.
+
+```js
+const numbers = [1, 2, 3, 4, 5];
+
+numbers.at(2); // -> 3
+numbers.at(0); // -> 1 (accede al primer elemento del array)
+numbers.at(-1); // -> 5 (accede al último elemento del array)
+numbers.at(-2); // -> 4 (accede al penúltimo elemento del array)
+numbers.at(10); // -> undefined (no existe el elemento en el indice 10)
+```
+
 <br />
 ## Array by copy (with, toReversed, toSorted, toSpliced)
+
+Este tema hace referencia a nuevos métodos de arrays que aplican operaciones sobre el array pero sin mutarlo, es decir, regresan copias del array original con las modificaciones correspondientes. Estos métodos son implementaciones de algunos métodos ya existentes, pero los cuales si mutaban el array original, cosa que no sucede con estos nuevos métodos.
+
+### toReversed()
+
+Nos ayuda a darle la vuelta a un array pero sin mutar el original (!Importante¡ No hace copias profundas, simplemente cambia las posiciones de los elementos no cambia las referencias)
+
+```js
+const numbers = [1, 2, 3, 4, 5];
+const reversed = numbers.toReversed();
+console.log(reversed); // -> [5, 4, 3, 2, 1]
+console.log(numbers); // -> [1, 2, 3, 4, 5] (el array original no se mutó)
+```
+
+### toSorted()
+
+Este nuevo método es una nueva implementación de método `sort()` pero el cual no modifica el array original, sino que crea una copia con los elementos ordenados según el criterio que le pasemos.
+
+```js
+const numbers = [5, 3, 8, 1, 2];
+const sorted = numbers.toSorted((a, b) => a - b);
+console.log(sorted); // -> [1, 2, 3, 5, 8]
+console.log(numbers); // -> [5, 3, 8, 1, 2] (el array original no se mutó)
+```
+
+### toSpliced()
+
+Este método es una nueva implementación del método original `splice()` aunque a diferencia de este el cual solo devuelve los elementos modificados y además muta el array original, este nuevo método `toSpliced()` devuelve una copia del array con los elementos modificados y no muta el array original.
+
+```js
+const numbers = [1, 2, 4, 5];
+const spliced = numbers.toSpliced(2, 1, 3); 
+
+console.log(spliced); // -> [1, 2, 3, 4, 5] (el elemento en el indice 2 fue reemplazado por el número 3)
+console.log(numbers); // -> [1, 2, 4, 5] (el array original no se mutó)
+```
+
+### with()
+
+Este nuevo método nos permite modificar los elementos de un array creando una nueva copia modificada sin alterar el array original. Este método recibe dos parámetros, el primero es el índice del elemento que queremos modificar y el segundo es el nuevo valor que queremos asignar a ese elemento. Siendo muy útil por ejemplo cuando en React queremos actualizar el estado de un array usando redux o algún otro gestor de estado.
+
+```js
+// SIN with()
+const todos = [
+  { id: 1, text: 'Learn React', completed: true },
+  { id: 2, text: 'Learn Angular', completed: false },
+  { id: 2, text: 'Learn Vue', completed: false },
+];
+
+const idToggle = 2;
+
+const newTodos = todos.map((todo) => {
+  if (todo.id === idToggle) return { ...todo, completed: true }; 
+  return todo;
+});
+
+// CON with()
+const todos = [
+  { id: 1, text: 'Learn React', completed: true },
+  { id: 2, text: 'Learn Angular', completed: false },
+  { id: 2, text: 'Learn Vue', completed: false },
+];
+
+const idToggle = 2;
+const index = todos.findIndex((todo) => todo.id === idToggle);
+const originalTodo = todos.at(index);
+
+const newTodos = todos.with(index, { ...originalTodo, completed: true });
+```
 
 <br />
 ## findLast, findLastIndex
 
+Los métodos `findLast` y `findLastIndex` son nuevas implementaciones de los métodos `find` y `findIndex` pero que en vez de buscar el elemento o índice desde el inicio del array, lo hacen desde el final del array hacia el inicio. Y como su propio nombre lo indica estos regresan el último elemento o índice que cumpla con una condición.
+
+```js
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+const lastEven = numbers.findLast((num) => num % 2 === 0);
+const lastEvenIndex = numbers.findLastIndex((num) => num % 2 === 0);
+```
+
 <br />
 ## Asignaciones lógicas &&=, ||=, ??=
 
-<br />
-## Teoría de conjuntos Set 
+Para poder entender estos operadores es importante primero saber que son los valores truthy, falsy y nullish en JavaScript, donde básicamente los podemos resumir de la siguiente forma:
 
-<br />
-## Promise.any
+- **Falsy**: Son valores que se consideran falsos en un contexto booleano, como `false`, `0`, `""` (cadena vacía), `null`, `undefined` y `NaN`.
+- **Truthy**: Son valores que se consideran verdaderos en un contexto booleano, como `true`, cualquier número distinto de cero, cualquier cadena no vacía, objetos, arrays, symbols, etc.
+- **Nullish**: Son valores que son `null` o `undefined`.
 
-<br />
-## Promise.allSettled
+Una vez habiendo entendido esto, podemos ver a que hacen referencia estos operadores:
 
-<br />
-## Promise.withResolvers
+- **`&&`**: Devuelve el primero valor que sea falsy, o el último valor truthy si todos son truthy. `1 && true && true && "Hola" && "" && 10` -> `""` el primer valor falsy.
+- **`||`**: Devuelve el primer valor que sea truthy, o el último valor falsy si todos son falsy. `0 || false || "" || "Hola" || 10` -> `"Hola"` el primer valor truthy.
+- **`??`**: Devuelve el primer valor que no sea nullish, o el último valor nullish si todos son nullish. `null ?? undefined ?? 0 ?? "Hola"` -> `0` el primer valor que no es nullish.
+
+Ahora vamos a ver como funcionan estos operadores como asignaciones lógicas:
+
+- **`&&=`**: Asigna el valor de la derecha a la variable solo si la variable es truthy.
+- **`||=`**: Asigna el valor de la derecha a la variable solo si la variable es falsy.
+- **`??=`**: Asigna el valor de la derecha a la variable solo si la variable es nullish.
+
+```js
+let a = 5;
+a &&= 10; // -> a = 10 (porque a es truthy)
+
+let b = 0;
+b ||= 10; // -> b = 10 (porque b es falsy)
+
+let c = null;
+c ??= 10; // -> c = 10 (porque c es nullish)
+
+const DEFAULT_LAST_NAME = 'Doe';
+
+let lastName = '';
+lastName &&= DEFAULT_LAST_NAME; // -> lastName = '' (porque lastName es falsy)
+
+let lastName = '';
+lastName ||= DEFAULT_LAST_NAME; // -> lastName = 'Doe' (porque lastName es falsy)
+
+let lastName = null;
+lastName ??= DEFAULT_LAST_NAME; // -> lastName = 'Doe' (porque lastName es nullish)
+```
