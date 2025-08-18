@@ -1,0 +1,73 @@
+---
+title: View Transitions
+description: Descubre cómo implementar View Transitions en tus aplicaciones web para mejorar la experiencia del usuario con transiciones suaves entre navegaciones de páginas.
+date: 2025-08-17
+tags: [CSS]
+slug: view-transitions
+isDraft: false
+---
+
+# View Transitions
+
+Las view transitions son animaciones utilizadas para animar la forma en como aparecen las paginas web cuando navegamos de una pagina a otra. Para activarlas es tan simple como añadir el siguiente código en nuestros estilos CSS:
+
+```css
+@view-transition {
+  navigation: auto;
+}
+```
+
+Si queremos modificar la forma en como se animan los elementos al navegar entre paginas, podemos realizar lo siguiente:
+
+```css
+/* Con el selector * especificamos que se aplica a todos elementos */
+::view-transition-group(*) {
+  animation-duration: 3s; /* -> Propiedad de animación */
+}
+```
+
+Si queremos hacer una animación donde cuando naveguemos de una pagina a otra se haga con efecto slide podemos hacer lo siguiente:
+
+```css
+::view-transition-old(root) {
+  animation: slide-out 0.5s forwards; /* -> Animación para cuando la pantalla sale de escena */
+}
+
+::view-transition-new(root) {
+  animation: slide-in 0.5s forwards; /* -> Animación para cuando la pantalla entra en escena */
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+```
+
+<br />
+## Ejemplo practico
+
+Hay ocasiones en donde lo que queremos es por ejemplo crear un nexo entre un elemento de la pagina original con un elemento de la pagina de destino, por ejemplo una imagen de un producto en una pagina de listado y la misma imagen en la pagina de detalle del producto. Para lograr esto debemos de crear una `view-transition-name` con un identificador único que debe ser igual en ambas paginas, de esta forma el navegador sabra que esos dos elementos están relacionados y los animara entre si. Por ejemplo:
+
+```html
+<img
+  src="imagen-producto.jpg"
+  alt="Producto 1"
+  class="product"
+  style="view-transition-name: image-product-1"
+/>
+```
