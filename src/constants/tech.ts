@@ -8,6 +8,7 @@ import Linux from '@/assets/tech/linux.svg'
 import OpenAI from '@/assets/tech/openai.svg'
 import Playwright from '@/assets/tech/playwright.svg'
 import Redux from '@/assets/tech/redux.svg'
+import RXJS from '@/assets/tech/rxjs.svg'
 import SocketIO from '@/assets/tech/socketio.svg'
 import Storybook from '@/assets/tech/storybook.svg'
 import SWR from '@/assets/tech/swr.svg'
@@ -66,6 +67,11 @@ export const TECH: any = {
     name: 'Redux',
     class: 'bg-[#764abc99] text-white',
     icon: Redux,
+  },
+  RXJS: {
+    name: 'RXJS',
+    class: 'bg-[#E23237bb] text-white',
+    icon: RXJS,
   },
   SOCKETIO: {
     name: 'Socket.IO',
