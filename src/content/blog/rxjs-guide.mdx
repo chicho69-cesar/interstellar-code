@@ -1,0 +1,388 @@
+---
+title: RXJS - Extensiones Reactivas en JavaScript y TypeScript
+description: RXJS es una de las bibliotecas más poderosas para manejar programación reactiva en JavaScript y TypeScript. En este post, exploramos sus conceptos clave como Observables, Subjects y operadores, y cómo pueden transformar la forma en como se manejan los datos asíncronos y eventos en las aplicaciones web.
+date: 2025-08-20
+tags: [JavaScript, TypeScript, RXJS, Angular]
+slug: rxjs-guide
+isDraft: false
+---
+
+# RXJS: Extensiones Reactivas en JavaScript y TypeScript
+
+RXJS (Reactive Extensions for JavaScript) es una biblioteca para componer programas asíncronos y basados en eventos utilizando secuencias observables. Es ampliamente utilizada en aplicaciones web, especialmente con frameworks como Angular, pero también puede ser utilizada con React, Vue y otros.
+
+Las extensiones reactivas nos permiten manejar flujos de datos y eventos de manera eficiente, facilitando la gestión de operaciones asíncronas como llamadas HTTP, eventos del usuario y más. Empleando lo que se conoce como programación reactiva.
+
+<br />
+## Observables
+
+Antes de profundizar en RXJS, es importante entender el concepto de `Observables`, `Observers` y `Subscriptions`.
+
+- **_Observable_**: Un Observable es una colección de valores o eventos futuros. Puedes pensar en ellos como una versión más poderosa de las Promesas, ya que pueden emitir múltiples valores a lo largo del tiempo, es decir, un observable puede estar emitiendo valores continuamente a lo largo del tiempo, a diferencia de una promesa que solo resuelve un valor una vez.
+- **_Observer_**: Un Observer es un objeto que define cómo reaccionar a los valores emitidos por un Observable. Un Observer puede tener hasta tres métodos: `next`, `error` y `complete`.
+- **_Subscription_**: Una Subscription representa la ejecución de un Observable. Cuando te suscribes a un Observable, la suscripción ejecutar las funciones definidas en el Observer donde recibirá los valores que emite el observable hasta que se complete o se cancele la suscripción.
+
+A continuación se muestra un ejemplo básico de cómo crear y suscribirse a un Observable:
+
+```js
+import { Observable, Observer } from 'rxjs';
+
+// Definimos un observer
+const observer: Observer<string> = {
+  next: (value) => console.log('Next [obs]: ', value),
+  error: (error) => console.warn('Error [obs]: ', error),
+  complete: () => console.info('Se terminó el observable [obs]'),
+}
+
+// Creamos un observable que emite valores de tipo string
+const observable$ = new Observable<string>((subscriber) => {
+  // Emitimos valores al observable que van a recibir las suscripciones
+  subscriber.next('Hola');
+  subscriber.next('Mundo');
+
+  // Forzar un error
+  // const a: any = undefined;
+  // a.name = 'Cesar';
+
+  // Completamos el observable
+  subscriber.complete();
+
+  // No se emite nada después de completar
+  subscriber.error('Algo salió mal');
+  subscriber.next('Ya no se emite');
+});
+
+// Nos suscribimos al observable, recibiendo los valores emitidos
+observable$.subscribe((value) => {
+  console.log(value);
+});
+
+// Podemos manejar los tres casos: next, error y complete [!Importante: Esta deprecado]
+observable$.subscribe(
+  (value) => {
+    console.log('Next: ', value);
+  },
+  (error) => {
+    console.warn('Error: ', error);
+  },
+  () => {
+    console.info('Se terminó el observable');
+  }
+);
+
+// Usando un observer
+const subscription = observable$.subscribe(observer);
+
+// Cancelar la suscripción (importante para evitar memory leaks)
+subscription.unsubscribe();
+```
+
+**Subjects**
+
+Un `Subject` es un tipo especial de Observable que permite multicasting, es decir, permite que múltiples observadores se suscriban a él y reciban los mismos valores emitidos. A diferencia de un Observable estándar, que emite valores de forma independiente para cada suscriptor, un Subject comparte la misma fuente de datos entre todos sus suscriptores.
+
+Cuando la data es emitida por el observable en si, es considerado como un `Cold Observable`, ya que cada suscriptor recibe su propia ejecución y valores. En cambio, cuando se utiliza un Subject, es considerado un `Hot Observable`, porque todos los suscriptores comparten la misma ejecución y reciben los mismos valores emitidos.
+
+```js
+import { Subject, Observer, Observable } from 'rxjs';
+
+const observer: Observer<number> = {
+  next: (value) => console.log('Next: ', value),
+  error: (error) => console.warn('Error: ', error),
+  complete: () => console.info('Se completo el observable')
+}
+
+const interval$ = new Observable<number>((subscriber) => {
+  // Emitimos un valor cada segundo
+  const intervalId = setInterval(() => {
+    subscriber.next(Math.random());
+  }, 1000);
+
+  // Limpiamos el intervalo cuando se complete o se cancele la suscripción
+  return () => {
+    clearInterval(intervalId);
+    console.log('Intervalo destruido');
+  }
+});
+
+// Creamos un Subject
+const subject$ = new Subject<number>();
+// Nos suscribimos al observable y enviamos los valores al Subject
+const intervalSubscription = interval$.subscribe(subject$);
+
+const subscription1 = subject$.subscribe(observer);
+const subscription2 = subject$.subscribe(observer);
+
+setTimeout(() => {
+  subject$.next(10);
+  subject$.complete();
+
+  // Nos desuscribimos del observable original
+  intervalSubscription.unsubscribe();
+}, 5500);
+```
+
+**of**
+
+El método `of` es un método de creación de observables que emite los valores que se le pasan como argumentos. Es decir que crea un observable que emite esos valores de manera sincrónica.
+
+```js
+import { of } from 'rxjs';
+
+// const observable$ = of<number>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+// const observable$ = of<Array<number>>([1, 2, 3, 4, 5]);
+// const observable$ = of<number>(...[1, 2, 3, 4, 5], 6, 7, 8, 9, 10);
+const observable$ = of<any>(
+  [1, 2],
+  { a: 1, b: 2 },
+  function () { },
+  true,
+  Promise.resolve(true)
+);
+
+observable$.subscribe({
+  next: (value) => console.log('Next: ', value),
+  error: (error) => console.warn('Error: ', error),
+  complete: () => console.info('Se completo el observable')
+});
+```
+
+**fromEvent**
+
+El método `fromEvent` es un método de creación que crea un observable a partir de eventos del DOM. Una vez que se suscribe al observable, el observable comenzará a emitir eventos cada vez que ocurra el evento especificado especificado y los observadores recibirán esos eventos.
+
+```js
+import { fromEvent } from 'rxjs';
+
+const event1$ = fromEvent<PointerEvent>(document, 'click');
+const event2$ = fromEvent<KeyboardEvent>(document, 'keyup');
+
+event1$.subscribe((event) => {
+  console.log('Coordenadas: ', event.x, event.y);
+});
+
+event2$.subscribe((event) => {
+  console.log('Tecla: ', event.key);
+});
+```
+
+**range**
+
+EL método `range` es un método de creación que crea un observable que emite una secuencia de números enteros en un rango especificado. El primer argumento es el valor inicial y el segundo es la cantidad de números a emitir. Si se especifica un tercer argumento, se utilizará como programador para la emisión de los valores, lo que permite que la emisión sea asíncrona.
+
+```js
+import { asyncScheduler, range } from 'rxjs';
+
+const src1$ = range(1, 10);
+const src2$ = range(-5, 10);
+
+console.log('Inicio');
+src1$.subscribe(console.log);
+console.log('Fin');
+
+console.log('Inicio');
+src2$.subscribe(console.log);
+console.log('Fin');
+
+// Range asíncrono
+const srcAsync$ = range(1, 5, asyncScheduler);
+
+console.log('Inicio');
+srcAsync$.subscribe(console.log);
+console.log('Fin');
+```
+
+**interval y timer**
+
+El observable `interval` emite un valor cada cierto tiempo, el cual lo definimos en una cierta cantidad de milisegundos, tiempo en el cual estará emitiendo un valor, el cual es el contador de veces que ha emitido un valor.
+
+Por otro lado el observable `timer` emite un valor después de un cierto tiempo, el cual definimos en milisegundos, y luego puede seguir emitiendo valores a intervalos regulares si se le proporciona un segundo argumento que define el intervalo.
+
+```js
+import { Observer, interval, timer } from 'rxjs';
+
+const observer: Observer<number> = {
+  next: (value) => console.log('Next: ', value),
+  error: (error) => console.warn('Error: ', error),
+  complete: () => console.info('Se completo el observable'),
+};
+
+const todayInFiveSeconds = new Date();
+todayInFiveSeconds.setSeconds(todayInFiveSeconds.getSeconds() + 5);
+
+// Interval
+const interval$ = interval(1000);
+
+console.log('Inicio');
+interval$.subscribe(observer);
+console.log('Fin');
+
+// Timer
+// const timer$ = timer(2000);
+// const timer$ = timer(2000, 1000);
+const timer$ = timer(todayInFiveSeconds);
+
+console.log('Inicio');
+timer$.subscribe(observer);
+console.log('Fin');
+```
+
+**asyncScheduler**
+
+La función `asyncScheduler` es un programador de tareas que permite ejecutar funciones de manera asíncrona, similar a setTimeout o setInterval, pero con  la capacidad de cancelar tareas programadas.
+
+La función `asyncScheduler.schedule` permite programar una tarea para que se ejecute después de un cierto tiempo o de manera repetitiva, y se puede cancelar la tarea con el método unsubscribe de la suscripción que devuelve.
+
+```js
+import { asyncScheduler } from 'rxjs';
+
+const greeting = () => console.log('Hello world');
+const greeting1 = (name: any) => console.log(`Hello ${name}`);
+const greeting2 = (user: any) => console.log(`Hello ${user.name} ${user.lastName}`);
+
+asyncScheduler.schedule(greeting, 1000);
+asyncScheduler.schedule(greeting1, 2000, 'Cesar');
+asyncScheduler.schedule(greeting2, 3000, { name: 'Cesar', lastName: 'Villalobos Olmos' });
+
+const subscription = asyncScheduler.schedule(function (state: any) {
+  console.log('State: ', state);
+
+  this.schedule(state + 1, 1000);
+}, 1000, 0);
+
+// setTimeout(() => {
+//   subscription.unsubscribe();
+// }, 10000);
+
+asyncScheduler.schedule(() => subscription.unsubscribe(), 10000);
+```
+
+**from**
+
+La función `from` crea un observable a partir de un iterable, una promesa, un array, un objeto iterable o un observable, es decir, esta función nos permite convertir diferentes tipos de datos en un observable que podemos suscribirnos.
+
+Su principal diferencia con of es que of emite los valores tal cual los recibe, mientras que from crea un observable que emite los valores de un iterable o una promesa uno por uno, lo que permite manejar flujos de datos más complejos y asíncronos.
+
+```js
+import { from, Observer } from 'rxjs';
+
+const observer: Observer<any> = {
+  next: (value) => console.log('Next: ', value),
+  error: (error) => console.warn('Error: ', error),
+  complete: () => console.info('Complete'),
+}
+
+const myGenerator = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+  yield 4;
+  yield 5;
+}
+
+const myIterable = myGenerator();
+
+// for (let value of myIterable) {
+//   console.log('Value: ', value);
+// }
+
+from(myIterable).subscribe(observer);
+
+// const sources$ = from([1, 2, 3, 4, 5]);
+// const sources$ = of(...[1, 2, 3, 4, 5]);
+// const sources$ = from('Cesar');
+const sources$ = from(fetch('https://api.github.com/users/chicho69-cesar'));
+
+sources$.subscribe(async (response) => {
+  const data = await response.json();
+  console.log('DATA: ', data);
+});
+
+sources$.subscribe(observer);
+```
+
+
+<br />
+## Operadores
+
+**map**
+
+**pluck**
+
+**mapTo**
+
+**filter**
+
+**tap**
+
+**reduce**
+
+**scan**
+
+**take**
+
+**first**
+
+**takeWhile**
+
+**takeUntil**
+
+**skip**
+
+**distinct**
+
+**distinctUntilChange**
+
+**distinctUntilKeyChange**
+
+
+<br />
+## Operadores de tiempo
+
+**debounceTime**
+
+**throttleTime**
+
+**sampleTime**
+
+**sample**
+
+**auditTime**
+
+
+<br />
+## Peticiones Ajax
+
+**ajax**
+
+**HTTP methods**
+
+
+<br />
+## Operadores de transformación
+
+**mergeAll**
+
+**mergeMap**
+
+**switchMap**
+
+**concatMap**
+
+**exhaustMap**
+
+
+<br />
+## Operadores de combinación
+
+**startWith**
+
+**endWith**
+
+**concat**
+
+**merge**
+
+**combineLatest**
+
+**forkJoin**
