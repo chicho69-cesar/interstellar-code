@@ -305,35 +305,326 @@ sources$.subscribe(observer);
 <br />
 ## Operadores
 
+Cuando queremos manipular un valor que fluye a través de un observable, podemos utilizar operadores, los operadores son funciones que toman un observable y devuelven un nuevo observable con los valores transformados.
+
+Para aplicar un operador, usamos el método `pipe` del observable original.
+
 **map**
+
+El operador `map` transforma cada valor emitido por el observable original aplicando una función a cada uno de ellos. Por ejemplo, si tenemos un observable que emite números y queremos multiplicarlos por 10, podemos usar `map` para lograrlo.
+
+```js
+import { fromEvent, range } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+range(1, 5).pipe(
+  map<number, number>((val) => val * 10)
+).subscribe((val) => console.log(val));
+
+const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
+
+const keyupMap$ = keyup$.pipe(
+  map((event) => event.code)
+);
+```
 
 **pluck**
 
+El operador `pluck` es una forma más concisa de acceder a una propiedad específica de un objeto emitido por el observable. Por ejemplo, si queremos obtener el valor de la propiedad `key` de un evento de teclado, podemos usar `pluck` para extraerlo.
+
+```js
+import { fromEvent } from 'rxjs';
+import { pluck } from 'rxjs/operators';
+
+const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
+
+const keyupPluck$ = keyup$.pipe(
+  // pluck('key')
+  pluck('target', 'baseURI')
+).subscribe((val) => console.log(val));
+```
+
 **mapTo**
+
+El operador `mapTo` es similar a `map`, pero en lugar de aplicar una función a cada valor emitido, simplemente emite un valor constante. Por ejemplo, si queremos que cada vez que se presione una tecla se emita el mismo valor, podemos usar `mapTo`.
+
+```js
+import { fromEvent } from 'rxjs';
+import { mapTo } from 'rxjs/operators';
+
+const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
+
+const keyupMapTo$ = keyup$.pipe(
+  mapTo('Tecla presionada')
+).subscribe((val) => console.log(val));
+```
 
 **filter**
 
+El operador `filter` permite filtrar los valores emitidos por un observable basándose en una condición específica. Solo los valores que cumplen con la condición son emitidos al suscriptor.
+
+```js
+import { from, fromEvent, range } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+range(20, 30).pipe(
+  filter((value: number, index: number) => {
+    return value % 2 === 0;
+  })
+).subscribe((value: number) => console.log(value));
+
+interface Character {
+  name: string;
+  type: 'hero' | 'villan';
+}
+
+const characters: Character[] = [
+  { name: 'Superman', type: 'hero' },
+  { name: 'Batman', type: 'hero' },
+  { name: 'Joker', type: 'villan' }
+];
+
+from(characters).pipe(
+  filter((character: Character) => character.type === 'hero')
+).subscribe((character: Character) => console.log(character));
+
+const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
+  map((event: KeyboardEvent) => event.code),
+  filter((key: string) => key === 'Enter'),
+);
+
+keyup$.subscribe(console.log);
+```
+
 **tap**
+
+El operador `tap` permite realizar efectos secundarios en los valores emitidos por un observable, es decir, `tap` ejecuta una función con la cual podemos observar los valores que están pasando por el observable sin modificar el flujo de datos.
+
+```js
+import { range } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+const numbers$ = range(1, 5);
+
+numbers$.pipe(
+  tap((value: number) => console.log('Before: ', value)),
+  map((value: number) => value * 10),
+  tap({
+    next: (value: number) => console.log('After: ', value),
+    complete: () => console.info('Complete')
+  })
+).subscribe((value: number) => console.log('Subs: ', value));
+```
 
 **reduce**
 
+El operador `reduce` se utiliza de forma similar a la función `reduce` de los arrays, pero en este caso se aplica a un flujo de datos (observable). El operador `reduce` toma un acumulador y un valor actual, y devuelve un único valor al final del flujo.
+
+```js
+import { interval } from 'rxjs';
+import { reduce, take, tap } from 'rxjs/operators';
+
+interval(500).pipe(
+  take(5),
+  tap((value: number) => console.log('Current value:', value)),
+  reduce((accumulate: number, current: number) => {
+    return accumulate + current;
+  }, 0)
+).subscribe({
+  next: (value: number) => {
+    console.log('Reduced value from interval:', value);
+  }
+});
+```
+
 **scan**
+
+El operador `scan` es similar a reduce, pero emite el valor acumulado en cada paso. Esto permite ver el estado intermedio de la acumulación, es decir, con reduce unicamente obtenemos el resultado final, mientras que con `scan` obtenemos todos los estados intermedios. Por lo tanto, `scan` es útil para mantener un estado a lo largo del tiempo en una secuencia de eventos.
+
+```js
+import { from } from 'rxjs';
+import { map, reduce, scan } from 'rxjs/operators';
+
+const numbers = [1, 2, 3, 4, 5];
+
+from(numbers).pipe(
+  reduce((acc, value) => acc + value, 0),
+).subscribe({
+  // Solo obtenemos el valor final -> 15
+  next: (result) => console.log('Sum of numbers with reduce: ', result),
+});
+
+from(numbers).pipe(
+  scan((acc, value) => acc + value, 0),
+).subscribe({
+  // Obtenemos todos los valores intermedios -> 1, 3, 6, 10, 15
+  next: (result) => console.log('Sum of numbers with scan: ', result),
+});
+```
 
 **take**
 
+El operador `take` permite limitar la cantidad de valores emitidos por un Observable, por ejemplo, si queremos tomar solo los primeros 3 valores emitidos por un Observable, podemos usar `take(3)`.
+
+```js
+import { of } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
+
+const numbers$ = of(1, 2, 3, 4, 5);
+
+numbers$.pipe(
+  tap((value: number) => console.log(`Value emitted: ${value}`)),
+  take(3),
+).subscribe({
+  next: (value: number) => console.log(`Received value: ${value}`),
+  complete: () => console.log('Stream completed'),
+});
+```
+
 **first**
+
+El operador `first` toma el primer valor que emite el observable el cual cumple con la condición especificada. Si no se encuentra ningún valor que cumpla con la condición, se lanzará un error.
+
+```js
+import { fromEvent } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
+
+const click$ = fromEvent<MouseEvent>(document, 'click');
+
+click$.pipe(
+  tap<MouseEvent>((event) => console.log('Click event:', event)),
+  map<MouseEvent, { x: number; y: number }>((event) => ({
+    x: event.clientX,
+    y: event.clientY,
+  })),
+  first<{ x: number, y: number }>((event) => event.y >= 150)
+).subscribe({
+  next: (value) => console.log('First click with y >= 150:', value),
+  complete: () => console.log('Completed'),
+});
+```
 
 **takeWhile**
 
-**takeUntil**
+El operador `takeWhile` permite tomar valores de un observable mientras se cumpla una condición, y se completa el observable cuando la condición deja de cumplirse. El segundo parámetro true indica que el último valor que cumple la condición también se emitirá.
+
+```js
+import { fromEvent } from 'rxjs';
+import { map, takeWhile } from 'rxjs/operators';
+
+const click$ = fromEvent<MouseEvent>(document, 'click');
+
+click$.pipe(
+  map<MouseEvent, { x: number; y: number }>(({ x, y }) => ({ x, y })),
+  // takeWhile(({ y }) => y <= 300),
+  takeWhile(({ y }) => y <= 300, true),
+).subscribe({
+  next: ({ x, y }) => console.log(`Mouse clicked at: (${x}, ${y})`),
+  complete: () => console.log('Mouse clicks completed below y=300'),
+});
+```
 
 **skip**
 
+El operador `skip` permite omitir una cantidad específica de valores emitidos por un observable, es decir, si queremos ignorar los primeros 3 valores emitidos por un observable, podemos usar `skip(3)`.
+
+```js
+import { interval } from 'rxjs';
+import { skip, take } from 'rxjs/operators';
+
+interval(1000).pipe(
+  skip(3),
+  take(5)
+).subscribe({
+  next: (value) => console.log(value),
+  complete: () => console.log('Complete')
+});
+```
+
+**takeUntil**
+
+El operador `takeUntil` permite tomar valores de un observable hasta que otro observable emita un valor, momento en el cual se completa el observable original.
+
+```js
+import { fromEvent, interval } from 'rxjs';
+import { skip, takeUntil, tap } from 'rxjs/operators';
+
+const button = document.createElement('button');
+button.innerHTML = 'Detener Timer';
+document.querySelector('body')!.append(button);
+
+const counter$ = interval(1000);
+
+const buttonClick$ = fromEvent(button, 'click').pipe(
+  tap(() => console.log('Button clicked before skip')),
+  skip(1),
+  tap(() => console.log('Button clicked after skip'))
+);
+
+counter$.pipe(
+  takeUntil(buttonClick$),
+).subscribe({
+  next: (value) => console.log(`Counter: ${value}`),
+  complete: () => console.log('Counter completed'),
+});
+```
+
 **distinct**
+
+El operador `distinct` filtra los valores emitidos por un observable, eliminando aquellos que ya han sido emitidos anteriormente. Por lo que los elementos que fluyan por el observable serán únicos.
+
+```js
+import { from, of } from 'rxjs';
+import { distinct } from 'rxjs/operators';
+
+const numbers$ = of(1, '1', 1, 3, 3, 2, 2, 4, 4, 5, 3, 1, '1');
+
+numbers$.pipe(
+  distinct()
+).subscribe(console.log);
+```
 
 **distinctUntilChange**
 
+El operador `distinctUntilChanged` se utiliza para filtrar valores consecutivos que son iguales, permitiendo que solo el primer valor de una secuencia de valores duplicados se emita. Pero a diferencia de distinct, este operador no elimina todos los duplicados, sino que solo los consecutivos.
+
+```js
+import { from, of } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+
+const numbers$ = of(1, '1', 1, 3, 3, 2, 2, 4, 4, 5, 3, 1, '1');
+
+numbers$.pipe(
+  distinctUntilChanged()
+).subscribe(console.log);
+```
+
 **distinctUntilKeyChange**
+
+El operador `distinctUntilKeyChanged` permite filtrar los valores emitidos por un observable, de tal manera que solo se emiten aquellos valores cuyo valor de una clave específica ha cambiado desde la última emisión. En este caso, estamos filtrando los personajes por su nombre, de modo que solo se emiten personajes con nombres únicos consecutivos.
+
+```js
+import { from } from 'rxjs';
+import { distinctUntilKeyChanged } from 'rxjs/operators';
+
+interface Character {
+  name: string;
+}
+
+const characters: Character[] = [
+  { name: 'Megaman' },
+  { name: 'X' },
+  { name: 'Zero' },
+  { name: 'Dr. Willy' },
+  { name: 'X' },
+  { name: 'Megaman' },
+  { name: 'Zero' },
+];
+
+from(characters).pipe(
+  distinctUntilKeyChanged('name')
+).subscribe(console.log);
+```
 
 
 <br />
