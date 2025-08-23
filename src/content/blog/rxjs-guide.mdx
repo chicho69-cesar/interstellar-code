@@ -875,13 +875,135 @@ ajax({
 
 **mergeAll**
 
+El operador `mergeAll` se encarga de suscribirse a los observables internos que se generan y emitir sus valores en el observable externo, es decir, este operador toma un observable que emite otros observables y los combina en un solo observable que emite todos los valores de los observables internos.
+
+```js
+import { fromEvent } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
+import { debounceTime, map, mergeAll, pluck } from 'rxjs/operators';
+
+const textInput = document.createElement('input');
+textInput.type = 'text';
+document.querySelector('body')!.append(textInput);
+
+const input$ = fromEvent<KeyboardEvent>(textInput, 'keyup');
+
+input$.pipe(
+  debounceTime(500),
+  pluck('target', 'value'),
+  map((text) => ajax.getJSON(
+    `https://api.github.com/search/users?q=${text}`
+  )),
+  mergeAll(),
+  pluck('items')
+).subscribe({
+  next: (users) => {
+    console.log('LOS USUARIOS: ', users);
+  },
+});
+```
+
 **mergeMap**
+
+El operador `mergeMap` recibe una función que retorna un observable, este operador se suscribe a cada uno de los observables que retorna la función y emite todos los valores de cada uno de esos observables, por ejemplo, si tenemos un observable que emite valores y queremos transformar cada valor en un nuevo observable, podemos usar `mergeMap` para lograrlo.
+
+```js
+import { fromEvent, interval, of } from 'rxjs';
+import { map, mergeMap, take, takeUntil } from 'rxjs/operators';
+
+const letters$ = of('a', 'b', 'c');
+
+letters$.pipe(
+  mergeMap((letter) => interval(1000).pipe(
+    map(i => letter + i),
+    take(3)
+  ))
+).subscribe({
+  next: (val) => console.log('next:', val),
+  complete: () => console.log('Complete')
+});
+
+const mousedown$ = fromEvent(document, 'mousedown');
+const mouseup$ = fromEvent(document, 'mouseup');
+const interval$ = interval();
+
+mousedown$.pipe(
+  mergeMap(() => interval$.pipe(
+    takeUntil(mouseup$)
+  ))
+).subscribe(console.log);
+```
 
 **switchMap**
 
+El operador `switchMap` lo que hace es cancelar la petición anterior y hacer una nueva petición cada vez que se emite un nuevo valor en el observable de origen, es decir, si tenemos un observable que emite valores y queremos transformar cada valor en un nuevo observable, pero solo queremos mantener la suscripción al último observable emitido, podemos usar `switchMap` para lograrlo.
+
+```js
+import { fromEvent } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
+import { debounceTime, switchMap, mergeAll, pluck } from 'rxjs/operators';
+
+const textInput = document.createElement('input');
+textInput.type = 'text';
+document.querySelector('body')!.append(textInput);
+
+const input$ = fromEvent<KeyboardEvent>(textInput, 'keyup');
+
+input$.pipe(
+  debounceTime(500),
+  pluck('target', 'value'),
+  switchMap((text) => ajax.getJSON(
+    `https://api.github.com/search/users?q=${text}`
+  )),
+  pluck('items')
+).subscribe({
+  next: (users) => {
+    console.log('LOS USUARIOS: ', users);
+  },
+});
+```
+
 **concatMap**
 
+El operador `concatMap` mapea cada uno de los valores emitidos por el observable origen a un observable interno y los concatena, es decir, espera a que el observable interno complete antes de suscribirse al siguiente. Por lo tanto, los valores emitidos por el observable interno se emiten en el mismo orden en que fueron recibidos del observable origen.
+
+```js
+import { fromEvent, interval, of } from 'rxjs';
+import { concatMap, take } from 'rxjs/operators';
+
+const interval$ = interval(500).pipe(take(3));
+const click$ = fromEvent(document, 'click');
+
+click$.pipe(
+  concatMap(() => interval$)
+).subscribe(console.log);
+
+const numbers$ = of(1, 2, 3);
+const letters$ = of('a', 'b', 'c');
+
+numbers$.pipe(
+  concatMap((num) => of(num * 10)),
+  concatMap((num) => letters$.pipe(
+    concatMap((letter) => of(letter.toUpperCase() + num))
+  ))
+).subscribe(console.log);
+```
+
 **exhaustMap**
+
+El operador `exhaustMap` ignora las emisiones entrantes mientras la suscripción interna está activa, es decir, si el observable interno aún no ha completado, cualquier nueva emisión del observable externo será ignorada hasta que el observable interno complete. Esto es útil en situaciones donde solo queremos procesar una solicitud a la vez y evitar la sobrecarga de múltiples solicitudes simultáneas.
+
+```js
+import { fromEvent, interval } from 'rxjs';
+import { exhaustMap, take } from 'rxjs/operators';
+
+const interval$ = interval(500).pipe(take(3));
+const click$ = fromEvent(document, 'click');
+
+click$.pipe(
+  exhaustMap(() => interval$)
+).subscribe(console.log);
+```
 
 
 <br />
@@ -889,12 +1011,149 @@ ajax({
 
 **startWith**
 
+El método `startWith` lo que nos permite es emitir valores antes de que se emitan los valores del observable, antes de que la suscripción reciba los valores del observable va a recibir los valores que le pasemos a `startWith`.
+
+```js
+import { of } from 'rxjs';
+import { startWith } from 'rxjs/operators';
+
+const numbers$ = of(1, 2, 3).pipe(
+  startWith('a', 'b', 'c'),
+);
+
+numbers$.subscribe({
+  next: (value) => console.log(value),
+  complete: () => console.log('Completed')
+});
+```
+
 **endWith**
+
+El método `endWith` lo que nos permite es emitir valores después de que se hayan emitido los valores del observable, después de que la suscripción reciba los valores del observable va a recibir los valores que le pasemos a `endWith`.
+
+```js
+import { of } from 'rxjs';
+import { endWith } from 'rxjs/operators';
+
+const numbers$ = of(1, 2, 3).pipe(
+  endWith('x', 'y', 'z')
+);
+
+numbers$.subscribe({
+  next: (value) => console.log(value),
+  complete: () => console.log('Completed')
+});
+```
 
 **concat**
 
+El método `concat` permite combinar múltiples Observables de manera secuencial, es decir, el segundo Observable no comenzará a emitir valores hasta que el primero haya completado.
+
+```js
+import { concat, interval, of } from "rxjs";
+import { take } from "rxjs/operators";
+
+const interval$ = interval(1000);
+
+concat(
+  interval$.pipe(take(3)),
+  interval$.pipe(take(2)),
+  of(1)
+).subscribe(console.log);
+```
+
 **merge**
+
+El método `merge` combina múltiples Observables en uno solo, emitiendo los valores de todos los Observables a medida que llegan, sin esperar a que uno complete antes de comenzar con el siguiente.
+
+```js
+import { fromEvent, merge } from 'rxjs';
+import { pluck } from 'rxjs/operators';
+
+const keyup$ = fromEvent(document, 'keyup');
+const click$ = fromEvent(document, 'click');
+
+merge(
+  keyup$.pipe(pluck('type')),
+  click$.pipe(pluck('type'))
+).subscribe(console.log);
+```
 
 **combineLatest**
 
+El método `combineLatest` toma múltiples observables y emite un valor cuando todos los observables han emitido al menos un valor, de ahí en adelante emitirá un valor cada vez que cualquiera de los observables emita un nuevo valor y se emiten juntos como un array.
+
+```js
+import { combineLatest, fromEvent } from 'rxjs';
+import { pluck } from 'rxjs/operators';
+
+const input1 = document.createElement('input');
+const input2 = document.createElement('input');
+
+input1.placeholder = 'email@gmail.com';
+input1.type = 'email';
+
+input2.placeholder = '*********';
+input2.type = 'password';
+
+document.querySelector('body')!.append(input1, input2);
+
+const getInputStream = (input: HTMLElement) => {
+  return fromEvent<KeyboardEvent>(input, 'keyup').pipe(
+    pluck('target', 'value')
+  );
+}
+
+combineLatest(
+  getInputStream(input1),
+  getInputStream(input2)
+).subscribe(([email, password]) => {
+  console.log('Email:', email);
+  console.log('Password:', password);
+});
+```
+
 **forkJoin**
+
+El método `forkJoin` se utiliza para combinar múltiples observables y esperar a que todos ellos completen, una vez que todos los observables hayan emitido su último valor, `forkJoin` emitirá un único valor que es un array o un objeto con los últimos valores emitidos por cada observable.
+
+```js
+import { forkJoin, interval, of } from 'rxjs';
+import { delay, take } from 'rxjs/operators';
+
+const numbers$ = of(1, 2, 3, 4, 5);
+const interval$ = interval(1000).pipe(take(5));
+const letters$ = of('a', 'b', 'c').pipe(delay(3500));
+
+forkJoin(
+  numbers$,
+  interval$,
+  letters$
+).subscribe(console.log)
+
+forkJoin(
+  numbers$,
+  interval$,
+  letters$
+).subscribe((resp) => {
+  console.log('Números: ', resp[0])
+  console.log('Intervalo: ', resp[1])
+  console.log('Letras: ', resp[2])
+});
+
+forkJoin({
+  numbers$,
+  interval$,
+  letters$
+}).subscribe((resp) => {
+  console.log(resp);
+});
+
+forkJoin({
+  num: numbers$,
+  int: interval$,
+  let: letters$
+}).subscribe((resp) => {
+  console.log(resp);
+});
+```
