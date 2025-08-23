@@ -632,21 +632,242 @@ from(characters).pipe(
 
 **debounceTime**
 
+El operador `debounceTime` se utiliza para limitar la cantidad de eventos que se procesan en un período de tiempo determinado. Es útil para evitar que se procesen eventos que ocurren demasiado rápido, como clics o pulsaciones de teclas.
+
+```js
+import { fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, pluck } from 'rxjs/operators';
+
+// Ejemplo 1
+const click$ = fromEvent(document, 'click');
+
+click$.pipe(
+  debounceTime(3000)
+).subscribe({
+  next: (event) => console.log(event),
+});
+
+// Ejemplo 2
+const input = document.createElement('input');
+document.querySelector('body')!.append(input);
+
+const input$ = fromEvent(input, 'keyup');
+
+input$.pipe(
+  debounceTime(1000),
+  pluck('target', 'value'),
+  distinctUntilChanged()
+).subscribe({
+  next: (value) => {
+    console.log('EL VALOR ES: ', value);
+  }
+});
+```
+
 **throttleTime**
+
+El operador `throttleTime` nos permite controlar la frecuencia con la que se emiten los valores de un observable. Este operador emite el primer valor inmediatamente y luego ignora los valores subsiguientes durante un período de tiempo especificado. Esto es útil para evitar la sobrecarga de eventos o para limitar la cantidad de veces que se procesa una acción en un intervalo de tiempo determinado.
+
+```js
+import { asyncScheduler, fromEvent } from 'rxjs';
+import { distinctUntilChanged, pluck, throttleTime } from 'rxjs/operators';
+
+// Ejemplo 1
+const click$ = fromEvent(document, 'click');
+
+click$.pipe(
+  throttleTime(3000)
+).subscribe({
+  next: (event) => console.log(event),
+});
+
+// Ejemplo 2
+const input = document.createElement('input');
+document.querySelector('body')!.append(input);
+
+const input$ = fromEvent(input, 'keyup');
+
+input$.pipe(
+  throttleTime(400, asyncScheduler, {
+    leading: true,
+    trailing: true
+  }),
+  pluck('target', 'value'),
+  distinctUntilChanged()
+).subscribe({
+  next: (value) => {
+    console.log('EL VALOR ES: ', value);
+  }
+});
+```
 
 **sampleTime**
 
+El operador `sampleTime` en RxJS emite el valor más reciente de un observable cada cierto intervalo de tiempo especificado. Es útil cuando se desea obtener una muestra periódica de los valores emitidos por un observable, en lugar de procesar cada valor individualmente.
+
+```js
+import { fromEvent } from 'rxjs';
+import { map, sampleTime } from 'rxjs/operators';
+
+const click$ = fromEvent<MouseEvent>(document, 'click');
+
+click$.pipe(
+  sampleTime(2000),
+  map(({ x, y }) => ({ x, y })),
+).subscribe(console.log);
+```
+
 **sample**
 
+El operador `sample` es un poco especial, ya que este operador va a emitir los  valores del observable fuente cada vez que el observable que se pasa como argumento emita un valor. Es decir, el observable que se pasa como argumento actúa como un "disparador" para emitir el valor más reciente del observable fuente.
+
+```js
+import { fromEvent, interval } from 'rxjs';
+import { sample } from 'rxjs/operators';
+
+const interval$ = interval(500);
+const click$ = fromEvent(document, 'click');
+
+interval$.pipe(
+  sample(click$)
+).subscribe(console.log);
+```
+
 **auditTime**
+
+El operador `auditTime` como se propio nombre indica, nos sirve para auditar el valor emitido por un observable cada cierto tiempo, es decir, este operador va a emitir el valor más reciente del observable fuente cada cierto intervalo de tiempo especificado, ignorando cualquier otro valor emitido durante ese intervalo.
+
+```js
+import { fromEvent } from 'rxjs';
+import { auditTime, map, tap } from 'rxjs/operators';
+
+const click$ = fromEvent<MouseEvent>(document, 'click');
+
+click$.pipe(
+  map(({ x }) => x),
+  tap((val) => console.log('tap', val)),
+  auditTime(5000)
+).subscribe(console.log);
+```
 
 
 <br />
 ## Peticiones Ajax
 
+Ajax es una librería de RxJS que permite realizar peticiones HTTP de  manera reactiva. Con esta librería, puedes manejar las respuestas y errores de las peticiones de forma más sencilla y elegante utilizando los operadores de RxJS.
+
 **ajax**
 
+El método `ajax` de la librería Ajax de RxJS permite realizar peticiones HTTP de manera reactiva. Este método devuelve un observable que emite la respuesta de la petición cuando esta se completa.
+
+```js
+import { of } from 'rxjs';
+import { ajax, AjaxError } from 'rxjs/ajax';
+import { catchError, pluck } from 'rxjs/operators';
+
+const url = 'https://api.github.com/users?per_page=5';
+
+ajax(url).pipe(
+  pluck('response'),
+  catchError((error: AjaxError) => {
+    console.warn('Error fetching users:', error);
+    return of([]);
+  })
+).subscribe({
+  next: (users) => console.log('Users:', users),
+  error: (error) => console.warn('Error in subscription:', error),
+  complete: () => console.log('Request completed')
+});
+```
+
+El método `ajax.getJSON` realiza una petición HTTP GET a una URL específica y devuelve un Observable que emite la respuesta JSON, este método acepta la URL y un objeto de opciones que puede incluir encabezados HTTP.
+
+```js
+import { ajax } from 'rxjs/ajax';
+
+const url = 'https://httpbin.org/delay/1';
+
+const obs$ = ajax.getJSON(url, {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer YOUR_TOKEN'
+});
+
+obs$.subscribe({
+  next: (response) => console.log('Response:', response),
+  error: (error) => console.error('Error:', error),
+  complete: () => console.log('Request completed')
+});
+```
+
+La principal diferencia entre `ajax.getJSON` y `ajax` es que `ajax.getJSON` realiza una petición HTTP GET y espera que la respuesta sea un JSON, mientras que `ajax` es más general y puede realizar peticiones de diferentes tipos y manejar diferentes formatos de respuesta. Además, `ajax` permite más configuraciones como el método HTTP, los encabezados, el cuerpo de la petición, etc.
+
 **HTTP methods**
+
+Usando la librería Ajax de RxJS, podemos realizar peticiones HTTP utilizando diferentes métodos como GET, POST, PUT, DELETE, entre otros. A continuación se muestran ejemplos de cómo realizar peticiones con estos métodos.
+
+```js
+import { ajax } from 'rxjs/ajax';
+
+const url = 'https://httpbin.org/delay/1';
+
+ajax.post(
+  url,
+  {
+    id: 1,
+    name: 'Cesar Villalobos Olmos',
+    age: 23,
+  },
+  {
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer 1234567890',
+  },
+).subscribe({
+  next: (response) => console.log('Response post:', response),
+  error: (error) => console.error('Error post:', error)
+});
+
+ajax.put(
+  url,
+  {
+    id: 1,
+    name: 'Cesar Villalobos Olmos',
+    age: 24,
+  },
+  {
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer 1234567890',
+  },
+).subscribe({
+  next: (response) => console.log('Response put:', response),
+  error: (error) => console.error('Error put:', error)
+});
+
+ajax.patch(
+  url,
+  {
+    age: 23,
+  },
+  {
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer 1234567890',
+  },
+).subscribe({
+  next: (response) => console.log('Response patch:', response),
+  error: (error) => console.error('Error patch:', error)
+});
+
+ajax({
+  url,
+  method: 'DELETE',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer 1234567890',
+  },
+}).subscribe({
+  next: (response) => console.log('Response delete:', response),
+  error: (error) => console.error('Error delete:', error)
+});
+```
 
 
 <br />
