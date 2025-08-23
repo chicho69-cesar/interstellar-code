@@ -31,6 +31,7 @@ import PostgreSQL from '@/assets/databases/postgresql.svg'
 import Python from '@/assets/backend/python.svg'
 import React from '@/assets/frontend/react.svg'
 import ReactRouter from '@/assets/frontend/react-router.svg'
+import Remix from '@/assets/frontend/remix.svg'
 import RxJs from '@/assets/dev/rxjs.svg'
 import Spring from '@/assets/backend/spring.svg'
 import SQLite from '@/assets/databases/sqlite.svg'
@@ -211,6 +212,11 @@ export const TAGS: any = {
     name: 'React Router',
     class: 'bg-[#CA424599] text-white',
     icon: ReactRouter,
+  },
+  REMIX: {
+    name: 'Remix',
+    class: 'bg-[#000000] text-white',
+    icon: Remix,
   },
   RXJS: {
     name: 'RxJS',
