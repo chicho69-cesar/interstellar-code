@@ -1,0 +1,423 @@
+---
+title: Principios SOLID en React
+description: En este artículo vamos a explorar cómo podemos aplicar los principios SOLID en el desarrollo de aplicaciones mediante el uso de la librería React. Cada principio será ilustrado con ejemplos prácticos para facilitar su comprensión y aplicación en proyectos reales, con la intención de mejorar la calidad, mantenibilidad y escalabilidad del código.
+date: 2025-08-28
+tags: [React, JavaScript, TypeScript]
+slug: solid-principles-in-react
+isDraft: false
+---
+
+# Principios SOLID en React
+
+## Single Responsibility Principle (SRP)
+
+index.tsx
+```tsx
+import { useFetchTodos } from './hooks/useFetchTodos'
+
+export default function SingleResponsibility() {
+  const { todos, isFetching } = useFetchTodos()
+
+  if (isFetching) {
+    return <p>Loading...</p>
+  }
+
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <li key={todo.id}>
+          <span>{todo.id}</span>
+          <span>{todo.title}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+types/todos.d.ts
+```ts
+export type TodoType = {
+  id: number
+  userId: number
+  title: string
+  completed: boolean
+}
+```
+
+services/todos.ts
+```ts
+import axios from 'axios'
+import type { TodoType } from '../types/todos'
+
+export async function fetchTodos() {
+  try {
+    const res = await axios.get<TodoType[]>('https://jsonplaceholder.typicode.com/todos')
+    return res.data
+  } catch (err) {
+    if ((err as { code: number }).code === 404) {
+      throw new Error('Not Found')
+    }
+
+    return []
+  }
+}
+```
+
+hooks/useFetchTodos.ts
+```ts
+import { useState, useEffect } from 'react'
+import { fetchTodos } from '../services/todos'
+import type { TodoType } from '../types/todos'
+
+export function useFetchTodos() {
+  const [todos, setTodos] = useState<TodoType[]>([])
+  const [isFetching, setIsFetching] = useState(true)
+
+  useEffect(() => {
+    fetchTodos()
+      .then((todos) => setTodos(todos))
+      .finally(() => setIsFetching(false))
+  }, [])
+
+  return {
+    todos,
+    isFetching,
+  }
+}
+```
+
+## Open/Closed Principle (OCP)
+
+```tsx
+import { Fragment } from 'react'
+import { TitleWithLink } from './components/TitleWithLink'
+import { TitleWithButton } from './components/TitleWithButton'
+import { TitleWithEmoji } from './components/TitleWithEmoji'
+
+export default function OpenClosed() {
+  return (
+    <Fragment>
+      <TitleWithLink
+        title='Link Button'
+        buttonText='Aloha!'
+        href='https://www.midu.dev'
+      />
+
+      <TitleWithButton
+        title='Normal Button'
+        buttonText='Aloha!'
+        onClick={() => console.log('Aloha!')}
+      />
+
+      <TitleWithEmoji
+        title='Emoji Title'
+        emoji='✌'
+      />
+    </Fragment>
+  )
+}
+```
+
+```ts
+import React from 'react'
+
+export type Props = {
+  title: string
+  type: 'default' | 'withLinkButton' | 'withNormalButton'
+  href?: string
+  buttonText?: string
+  onClick?: () => void
+}
+
+export type TitleProps = {
+  title: string
+  children?: React.ReactElement
+}
+
+export type TitleWithLinkProps = {
+  title: string
+  href?: string
+  buttonText?: string
+}
+
+export type TitleWithButtonProps = {
+  title: string
+  buttonText?: string
+  onClick?: () => void
+}
+
+export type TitleWithEmojiProps = {
+  title: string
+  emoji?: string
+}
+```
+
+```tsx
+import type { TitleProps } from '../types/buttons.d'
+
+export function Title({ title, children }: TitleProps) {
+  return (
+    <div 
+      style={{ 
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '1rem',
+      }}
+    >
+      <h1>{title}</h1>
+      {children}
+    </div>
+  )
+}
+```
+
+```tsx
+import { Title } from './Title'
+import type { TitleWithButtonProps } from '../types/buttons.d'
+
+export function TitleWithButton({ title, buttonText, onClick }: TitleWithButtonProps) {
+  return (
+    <Title title={title}>
+      <button onClick={onClick}>{buttonText}</button>
+    </Title>
+  )
+}
+```
+
+```tsx
+import { Title } from './Title'
+import type { TitleWithEmojiProps } from '../types/buttons.d'
+
+export function TitleWithEmoji({ title, emoji }: TitleWithEmojiProps) {
+  return (
+    <Title title={title}>
+      <p style={{ fontSize: '48px' }}>{emoji}</p>
+    </Title>
+  )
+}
+```
+
+```tsx
+import { Title } from './Title'
+import type { TitleWithLinkProps } from '../types/buttons.d'
+
+export function TitleWithLink({ title, href, buttonText }: TitleWithLinkProps) {
+  return (
+    <Title title={title}>
+      <div>
+        <a href={href}>{buttonText}</a>
+      </div>
+    </Title>
+  )
+}
+```
+
+## Liskov Substitution Principle (LSP)
+
+```tsx
+import React from 'react'
+
+const ButtonSizes = {
+  sm: '16px',
+  md: '24px',
+  lg: '32px',
+  xl: '40px',
+} as const
+
+type ButtonProps = {
+  children: React.ReactNode
+  color?: string
+  size: keyof typeof ButtonSizes
+}
+
+function Button({ children, color = 'black', size }: ButtonProps) {
+  const buttonSize = ButtonSizes[size]
+
+  return (
+    <button style={{ backgroundColor: color, fontSize: buttonSize }}>
+      {children}
+    </button>
+  )
+}
+
+type ColorizedButtonsProps = Omit<ButtonProps, 'color'>
+
+function RedButton({ children, size }: ColorizedButtonsProps) {
+  return <Button color='red' size={size}>{children}</Button>
+}
+
+function GreenButton({ children, size }: ColorizedButtonsProps) {
+  return <Button color='green' size={size}>{children}</Button>
+}
+
+function BlueButton({ children, size }: ColorizedButtonsProps) {
+  return <Button color='blue' size={size}>{children}</Button>
+}
+
+export default function LiskovSubstitution() {
+  return (
+    <div>
+      <RedButton size='md'>Rojo</RedButton>
+      <GreenButton size='md'>Verde</GreenButton>
+      <BlueButton size='md'>Azul</BlueButton>
+      <Button size='md'>Default</Button>
+    </div>
+  )
+}
+```
+
+## Interface Segregation Principle (ISP)
+
+```tsx
+type PostType = {
+  title: string
+  author: {
+    name: string
+    age: number
+  },
+  createdAt: Date
+}
+
+function Post({ post }: { post: PostType }) {
+  return (
+    <div>
+      <PostTitle title={post.title} />
+      <span>{post.author.name}</span>
+      <PostData createdAt={post.createdAt} />
+    </div>
+  )
+}
+
+type TitleProps = {
+  title: string
+}
+
+function PostTitle({ title }: TitleProps) {
+  return <h1>{title}</h1>
+}
+
+type DataProps = {
+  createdAt: Date
+}
+
+function PostData({ createdAt }: DataProps) {
+  return <time>{createdAt.toISOString()}</time>
+}
+
+export default function InterfaceSegregation() {
+  return (
+    <Post
+      post={{
+        title: 'Curso de React',
+        author: {
+          name: 'Miguel Ángel Duran',
+          age: 38,
+        },
+        createdAt: new Date(),
+      }}
+    />
+  )
+}
+```
+
+## Dependency Inversion Principle (DIP)
+
+index.tsx
+```tsx
+import { useData } from './hooks/useData'
+import type { TodoType } from './types/todos.d'
+import { fetcherFromApi as fetcher } from './utils/fetchers'
+
+export default function DependencyInversion() {
+  const { data } = useData<TodoType[]>({ 
+    key: '/todos', 
+    fetcher, 
+  })
+
+  if (!data) return (
+    <p>Loading ....</p>
+  )
+
+  return (
+    <ul>
+      {data.map((todo) => (
+        <li key={todo.id}>
+          <span>{todo.id}</span>
+          <span>{todo.title}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+types/todos.d.ts
+```ts
+export type TodoType = {
+  id: number
+  userId: number
+  title: string
+  completed: boolean
+}
+```
+
+constants/todos.ts
+```ts
+export const TODOS_API_URL = 'https://jsonplaceholder.typicode.com/todos'
+```
+
+utils/fetchers.ts
+```ts
+import { TODOS_API_URL } from '../constants/todos'
+
+export const fetcherFromApi = async function<T>(): Promise<T> {
+  const url = TODOS_API_URL
+  const res = await fetch(url)
+  return res.json()
+}
+
+export const fetcherFromLocalStorage = async function<T>(): Promise<T> {
+  const todos = localStorage.getItem('todos')
+  return todos ? JSON.parse(todos) : []
+}
+
+export const fetcherFromMocks = async function<T>(): Promise<T> {
+  return [
+    {
+      id: 1,
+      userId: 1,
+      title: 'Todo 1',
+      completed: false,
+    },
+    {
+      id: 2,
+      userId: 1,
+      title: 'Todo 2',
+      completed: true,
+    },
+  ] as T
+}
+```
+
+hooks/useData.ts
+```ts
+import useSWR from 'swr'
+
+interface UseData<T> {
+  key: string
+  fetcher: () => Promise<T>
+}
+
+interface Response<T> {
+  data: T | undefined
+  error: string | undefined
+  isValidating: boolean
+}
+
+export function useData<T>({ key, fetcher }: UseData<T>): Response<T> {
+  const { data, error, isValidating } = useSWR<T, string>(key, fetcher)
+  return { data, error, isValidating }
+}
+```
