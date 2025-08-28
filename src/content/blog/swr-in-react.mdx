@@ -1,0 +1,318 @@
+---
+title: SWR en React - Guía Completa para la Gestión de Datos
+description: Guía completa sobre como utilizar SWR en aplicaciones de React para la gestión eficiente de las solicitudes de datos asíncronas, incluyendo ejemplos prácticos y recomendaciones de uso para sacarle el máximo potencial a esta librería.
+date: 2025-08-26
+tags: [React, JavaScript, TypeScript, SWR]
+slug: swr-in-react
+isDraft: false
+---
+
+# SWR en React: Guía Completa para la Gestión de Datos
+
+SWR (Stale-While-Revalidate) es una librería de React para la gestión de datos asíncronos que facilita la obtención, almacenamiento en caché y actualización de datos en aplicaciones web. Esta librería fue desarrollada por Vercel, SWR se ha convertido en una herramienta popular debido a su simplicidad y eficiencia.
+
+Para comenzar a utilizar SWR en tu proyecto de React, primero debes instalar la librería. Puedes hacerlo utilizando npm, pnpm o yarn:
+
+```bash
+npm install swr
+yarn add swr
+pnpm add swr
+```
+
+
+<br />
+## Ejemplo de Uso Básico
+
+Para poder utilizar SWR, debemos de tener disponible una función la cual va a ser la responsable de hacer las peticiones al servidor con el cual nos vamos a comunicar, esta función fetcher no importa que tipo de mecanismo utilice para hacer las peticiones, puede ser fetch, axios, graphql-request, etc. En este ejemplo utilizaremos fetch:
+
+Por ejemplo, en el siguiente código utilizamos la función nativa de fetch para hacer las peticiones http:
+
+```js
+function fetcher(...args) {
+  return fetch(...args).then((res) => res.json());
+}
+```
+
+Una vez que ya tenemos configurado nuestro fetcher, podemos utilizar el hook useSWR para hacer las peticiones a la API, este hook recibe dos parámetros, el primero es la clave (key) que identifica la petición y el segundo es la función fetcher que hemos creado anteriormente:
+
+```js
+import useSWR from 'swr';
+
+function App() {
+  const { data, error, isLoading } = useSWR('/api/data', fetcher);
+}
+```
+
+Como podemos observar, useSWR nos devuelve un objeto con tres propiedades principales: data, error e isLoading. La propiedad data contiene la respuesta de la petición, error contiene cualquier error que haya ocurrido durante la petición y isLoading es un booleano que indica si la petición está en curso.
+
+Siempre que utilizamos el hook useSWR a lo largo de nuestra aplicación y usemos la misma key, SWR se encargará de compartir el estado entre todos los componentes que utilicen esa misma key, esto es muy útil para evitar hacer múltiples peticiones a la misma API y mantener los datos sincronizados en toda la aplicación.
+
+Si queremos por ejemplo manejar un custom hook para encapsular la lógica de obtención de datos utilizando TypeScript, podemos hacerlo de la siguiente manera:
+
+```ts
+import useSWR from 'swr';
+
+function fetcher<T>(url: string): Promise<T> {
+  return fetch(url).then((res) => res.json());
+}
+
+function useData<T>(url: string) {
+  const { data, error, isLoading } = useSWR<T>(url, fetcher);
+
+  return {
+    data,
+    isLoading,
+    isError: error,
+  };
+}
+```
+
+El hook useSWR acepta tres campos principales, la key, el fetcher y un objeto de configuración opcional, mediante el cual podemos personalizar el comportamiento del hook, algunos de los campos más comunes en este objeto de configuración son:
+
+- `revalidateOnFocus`: Si es true, SWR revalidará los datos cuando la ventana recupere el foco. Por defecto es true.
+- `refreshInterval`: Intervalo en milisegundos para refrescar automáticamente los datos. Si es 0, no se refrescarán automáticamente. Por defecto es 0.
+- `dedupingInterval`: Intervalo en milisegundos para evitar peticiones duplicadas. Si se hace una petición con la misma key dentro de este intervalo, SWR devolverá los datos en caché. Por defecto es 2000 ms.
+- `fallbackData`: Datos iniciales que se usarán mientras se carga la petición. Útil para SSR o datos estáticos.
+- `onError`: Función que se ejecuta cuando ocurre un error en la petición.
+- `onSuccess`: Función que se ejecuta cuando la petición es exitosa.
+
+La campos completos que nos regresa el hook useSWR son:
+
+- `data`: Los datos obtenidos de la petición.
+- `error`: El error ocurrido durante la petición.
+- `isLoading`: Booleano que indica si la petición está en curso.
+- `isValidating`: Booleano que indica si los datos están siendo validados.
+- `mutate`: Función para actualizar manualmente los datos en caché.
+
+
+<br />
+## Configuración Avanzada
+
+Para utilizar SWR podemos envolver nuestra aplicación con el componente SWRConfig, el cual nos permite definir una configuración global para todos los hooks useSWR en nuestra aplicación, donde podemos definir cosas como el fetcher por defecto que se va a utilizar en la aplicación, el objeto para manejar el caché de datos, entre otras cosas:
+
+```js
+import { SWRConfig } from 'swr';
+
+function fetcher(...args) {
+  return fetch(...args).then((res) => res.json());
+}
+
+function App() {
+  return (
+    <SWRConfig
+      value={{
+        fetcher,
+        onError: (error) => {
+          console.error('Error al obtener los datos:', error);
+        },
+        refreshInterval: 3000,
+        provider: () => new Map()
+      }}
+    >
+      <YourComponent />
+    </SWRConfig>
+  );
+}
+```
+
+
+<br />
+## Fetching de datos
+
+Como lo mencione anteriormente, SWR funciona con cualquier función o librería que nos permita hacer peticiones o manejar el flujo de datos de forma asíncrona, a continuación muestro ejemplos de como utilizar SWR con diferentes librerías para hacer las peticiones:
+
+**Usando fetch:*
+
+```js
+import useSWR from 'swr';
+
+function fetcher(...args) {
+  return fetch(...args).then((res) => res.json());
+}
+
+function App() {
+  const { data, error, isLoading } = useSWR('/api/data', fetcher);
+}
+```
+
+**Usando axios:**
+
+```js
+import useSWR from 'swr';
+import axios from 'axios';
+
+function fetcher(url) {
+  return axios.get(url).then((res) => res.data);
+}
+
+function App() {
+  const { data, error, isLoading } = useSWR('/api/data', fetcher);
+}
+```
+
+**Usando graphql-request:**
+
+```js
+import useSWR from 'swr';
+import { request } from 'graphql-request'
+
+function fetcher(query) {
+  return request('/api/graphql', query);
+}
+
+function App() {
+  const query = `{
+    users {
+      id
+      name
+    }
+  }`;
+
+  const { data, error, isLoading } = useSWR(query, fetcher);
+}
+```
+
+Cuando utilizamos SWR, por defecto la librería implementa varias estrategias para mantener los datos actualizados y sincronizados en nuestra aplicación. Algunas de las estrategias de revalidación más comunes son, las siguientes:
+
+- **Revalidación al enfocar la ventana**: SWR revalidará los datos automáticamente cuando la ventana del navegador recupere el foco. Esto es útil para asegurarse de que los datos estén siempre actualizados cuando el usuario regresa a la aplicación después de haber estado en otra pestaña o ventana.
+- **Revalidación en intervalos regulares**: Podemos configurar SWR para que revalide los datos en intervalos regulares utilizando la opción `refreshInterval`. Esto es útil para datos que cambian con frecuencia y necesitan ser actualizados periódicamente.
+- **Revalidación al reconectar**: SWR puede revalidar los datos automáticamente cuando la conexión a internet se restablece después de haber estado desconectada. Esto es útil para aplicaciones que necesitan funcionar en modo offline y sincronizar los datos cuando la conexión se restablece.
+
+Estas opciones se pueden configurar ya sea a nivel global utilizando el componente SWRConfig o de forma individual en cada hook useSWR, por ejemplo:
+
+```js
+const { data, error, isLoading } = useSWR('/api/data', fetcher, {
+  revalidateOnFocus: true,
+  refreshInterval: 5000,
+  revalidateOnReconnect: true,
+});
+```
+
+Cuando necesitamos pasar múltiples argumentos a la función fetcher, podemos hacerlo utilizando un array como key en el hook useSWR, donde el primer elemento del array es la URL o endpoint y los siguientes elementos son los parámetros adicionales que queremos pasar a la función fetcher. Por ejemplo:
+
+```js
+const { data, error, isLoading } = useSWR(
+  ['/api/data', param1, param2],
+  (url, p1, p2) => fetcher(url, p1, p2)
+);
+```
+
+Un ejemplo común de esto, es cuando necesitamos pasar un token de autenticación o una api key para hacer la petición a la API:
+
+```js
+const { data, error, isLoading } = useSWR(
+  ['/api/data', token],
+  (url, token) => fetcher(url, token)
+);
+```
+
+
+<br />
+## Mutaciones de datos
+
+Las mutaciones de datos son una parte fundamental en la gestión de datos en aplicaciones web, ya que nos permiten actualizar, crear o eliminar datos en el servidor y reflejar esos cambios en la interfaz de usuario de manera eficiente. SWR proporciona una función llamada mutate que nos permite realizar mutaciones de datos de forma sencilla y efectiva.
+
+**Global Mutate**
+
+El global mutate nos permite actualizar los datos en caché para una key específica en toda la aplicación, lo cual es útil cuando necesitamos reflejar cambios en múltiples componentes que utilizan la misma key. Por ejemplo, si tenemos una lista de usuarios y agregamos un nuevo usuario, podemos utilizar el global mutate para actualizar la lista en todos los componentes que la utilizan:
+
+```js
+import { mutate } from 'swr';
+
+function addUser(newUser) {
+  fetch(
+    '/api/users',
+    {
+      method: 'POST',
+      body: JSON.stringify(newUser),
+    }
+  )
+    .then(() => {
+      mutate('/api/users');
+    });
+}
+```
+
+**Bound mutate**
+
+El bound mutate es una función que se obtiene directamente del hook useSWR y nos permite actualizar los datos en caché para la key específica utilizada en ese hook. Esto es útil cuando queremos actualizar los datos en un componente específico sin afectar a otros componentes que utilizan la misma key. Por ejemplo, si tenemos un componente que muestra los detalles de un usuario y queremos actualizar esos detalles después de editar el usuario, podemos utilizar el bound mutate:
+
+```js
+import useSWR from 'swr';
+
+function UserDetails({ userId }) {
+  const { data, error, isLoading, mutate } = useSWR(`/api/users/${userId}`, fetcher);
+
+  function updateUser(updatedUser) {
+    fetch(
+      `/api/users/${userId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(updatedUser),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => mutate(data));
+  }
+}
+```
+
+**Revalidation**
+
+Por defecto, cuando utilizamos la función mutate para actualizar los datos en caché, SWR revalidará automáticamente los datos haciendo una nueva petición al servidor para asegurarse de que los datos estén actualizados. Sin embargo, en algunos casos, es posible que no queramos que se realice esta revalidación automática, por ejemplo, si estamos seguros de que los datos que estamos pasando a mutate son correctos y no necesitamos hacer una nueva petición al servidor.
+
+```js
+import { useSWRConfig } from 'swr';
+
+function Profile() {
+  const { mutate } = useSWRConfig();
+
+  return (
+    <button
+      onClick={() => {
+        mutate('/api/user');
+      }}
+    >
+      Logout
+    </button>
+  );
+}
+```
+
+
+<br />
+## Temas avanzados
+
+**Manejo de errores**
+
+Al momento de hacer peticiones a una API, es común que puedan ocurrir errores, ya sea por problemas de red, errores en el servidor o respuestas inesperadas. SWR proporciona varias formas de manejar estos errores de manera efectiva, pero los podemos manejar de forma personalizad o manual, obteniendo los errores desde la función fetcher y de ahí lanzar errores personalizados para utilizarlos en la aplicación con el hook useSWR:
+
+```js
+function fetcher(...args) {
+  return fetch(...args).then((res) => {
+    if (!res.ok) {
+      throw new Error('Error al obtener los datos');
+    }
+
+    return res.json();
+  });
+}
+```
+
+**Dependent fetching**
+
+En ocasiones, es posible que necesitemos hacer peticiones a una API que dependen de otros datos o condiciones. Por ejemplo, si queremos obtener los detalles de un usuario, primero necesitamos tener el ID del usuario. SWR nos permite manejar este tipo de situaciones utilizando la opción de key condicional.
+
+```js
+const { data: user } = useSWR(userId ? `/api/users/${userId}` : null, fetcher);
+```
+
+En otras ocasiones lo que queremos por ejemplo es utilizar como key algún valor obtenido de otra petición echa con SWR, por ejemplo obtenemos la información de un producto, y en base a esa información queremos obtener los reviews de ese producto, para esto podemos hacer lo siguiente:
+
+```js
+const { data: product } = useSWR('/api/product/1', fetcher);
+const { data: reviews } = useSWR(
+  () => `/api/reviews?productSlug=${product.slug}`,
+  fetcher
+);
+```
