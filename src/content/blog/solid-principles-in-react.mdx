@@ -9,9 +9,20 @@ isDraft: false
 
 # Principios SOLID en React
 
+Los principios SOLID son un conjunto de cinco principios de diseño de software orientado a objetos que ayudan a crear sistemas más mantenibles, escalables y robustos. Estos principios son en particular útiles en el desarrollo de aplicaciones con React, ya que fomentan la creación de componentes y módulos que son fáciles de entender y modificar.
+
+En general dentro de la arquitectura de software, los principios SOLID son considerados buenas prácticas para el diseño y desarrollo de software. Estos principios fueron introducidos por Robert C. Martin (también conocido como "Uncle Bob") y son ampliamente utilizados en la industria del desarrollo de software para mejorar la calidad del código y facilitar su mantenimiento a largo plazo.
+
+
+<br />
 ## Single Responsibility Principle (SRP)
 
-index.tsx
+El principio de responsabilidad única establece que un módulo o clase debe tener una única razón para cambiar, es decir, debe estar enfocado en una sola tarea o responsabilidad. En el contexto de React, esto significa que cada componente debe tener una única responsabilidad y no debe manejar múltiples tareas o lógicas complejas. Al igual que el uso de servicios, estados globales o hooks personalizados para separar las responsabilidades.
+
+El siguiente ejemplo muestra cómo aplicar el principio de responsabilidad única en un componente de React que obtiene y muestra una lista de tareas (todos) desde una API. En este caso, hemos separado la lógica de obtención de datos en un hook personalizado (`useFetchTodos`) y la lógica de presentación en el componente principal (`SingleResponsibility`). 
+
+*index.tsx*: Solo se encarga mostrar la información de las tareas.
+
 ```tsx
 import { useFetchTodos } from './hooks/useFetchTodos'
 
@@ -35,7 +46,8 @@ export default function SingleResponsibility() {
 }
 ```
 
-types/todos.d.ts
+*types/todos.d.ts*: Solo define el tipo de dato.
+
 ```ts
 export type TodoType = {
   id: number
@@ -45,7 +57,8 @@ export type TodoType = {
 }
 ```
 
-services/todos.ts
+*services/todos.ts*: Solo se encarga de obtener los datos.
+
 ```ts
 import axios from 'axios'
 import type { TodoType } from '../types/todos'
@@ -64,7 +77,8 @@ export async function fetchTodos() {
 }
 ```
 
-hooks/useFetchTodos.ts
+*hooks/useFetchTodos.ts*: Es un hook personalizado que solo se encarga de manejar el estado y la lógica de obtención de datos.
+
 ```ts
 import { useState, useEffect } from 'react'
 import { fetchTodos } from '../services/todos'
@@ -87,7 +101,12 @@ export function useFetchTodos() {
 }
 ```
 
+<br />
 ## Open/Closed Principle (OCP)
+
+El principio de abierto/cerrado establece que una entidad de software (como una clase, módulo o función) debe estar abierta para la extensión pero cerrada para la modificación. Esto significa que deberíamos poder agregar nuevas funcionalidades sin tener que modificar el código existente, lo que ayuda a evitar errores y mantener la estabilidad del sistema. En React, esto se puede lograr mediante el uso de componentes reutilizables y la composición de componentes, permitiendo que los componentes existentes se extiendan sin necesidad de cambiar su implementación interna.
+
+*index.tsx*: Componente principal que utiliza otros componentes especializados para diferentes tipos de títulos.
 
 ```tsx
 import { Fragment } from 'react'
@@ -118,6 +137,8 @@ export default function OpenClosed() {
   )
 }
 ```
+
+*types/buttons.d.ts*: Define los tipos de datos para los diferentes componentes de título.
 
 ```ts
 import React from 'react'
@@ -153,6 +174,8 @@ export type TitleWithEmojiProps = {
 }
 ```
 
+*components/Title.tsx*: Componente base que maneja la presentación del título y cualquier contenido adicional.
+
 ```tsx
 import type { TitleProps } from '../types/buttons.d'
 
@@ -173,6 +196,8 @@ export function Title({ title, children }: TitleProps) {
 }
 ```
 
+*components/TitleWithButton.tsx*: Componente especializado que extiende la funcionalidad del componente base para incluir un botón.
+
 ```tsx
 import { Title } from './Title'
 import type { TitleWithButtonProps } from '../types/buttons.d'
@@ -186,6 +211,8 @@ export function TitleWithButton({ title, buttonText, onClick }: TitleWithButtonP
 }
 ```
 
+*components/TitleWithEmoji.tsx*: Componente especializado que extiende la funcionalidad del componente base para incluir un emoji.
+
 ```tsx
 import { Title } from './Title'
 import type { TitleWithEmojiProps } from '../types/buttons.d'
@@ -198,6 +225,8 @@ export function TitleWithEmoji({ title, emoji }: TitleWithEmojiProps) {
   )
 }
 ```
+
+*components/TitleWithLink.tsx*: Componente especializado que extiende la funcionalidad del componente base para incluir un enlace.
 
 ```tsx
 import { Title } from './Title'
@@ -214,7 +243,12 @@ export function TitleWithLink({ title, href, buttonText }: TitleWithLinkProps) {
 }
 ```
 
+<br />
 ## Liskov Substitution Principle (LSP)
+
+El principio de sustitución de Liskov establece que los objetos de una clase derivada deben poder sustituir a los objetos de la clase base sin alterar el correcto funcionamiento del programa. En el contexto de React, esto significa que los componentes derivados o especializados deben poder ser utilizados en lugar de sus componentes base sin causar errores o comportamientos inesperados. Esto se puede lograr mediante la creación de componentes que extienden la funcionalidad de un componente base, asegurando que mantengan la misma interfaz y comportamiento esperado.
+
+*index.tsx*: Componente principal que utiliza botones de diferentes colores, todos derivados del mismo componente base.
 
 ```tsx
 import React from 'react'
@@ -268,7 +302,12 @@ export default function LiskovSubstitution() {
 }
 ```
 
+<br />
 ## Interface Segregation Principle (ISP)
+
+El principio de segregación de interfaces establece que los clientes no deben verse obligados a depender de interfaces que no utilizan. En el contexto de React, esto significa que los componentes deben tener interfaces específicas y enfocadas, evitando la creación de componentes monolíticos con múltiples responsabilidades. Al diseñar componentes con interfaces claras y específicas, se facilita su reutilización y mantenimiento.
+
+*index.tsx*: Componente principal que utiliza componentes especializados para mostrar diferentes partes de una publicación (post).
 
 ```tsx
 type PostType = {
@@ -322,9 +361,13 @@ export default function InterfaceSegregation() {
 }
 ```
 
+<br />
 ## Dependency Inversion Principle (DIP)
 
-index.tsx
+El principio de inversión de dependencias establece que los módulos de alto nivel no deben depender de módulos de bajo nivel, sino que ambos deben depender de abstracciones. En el contexto de React, esto significa que los componentes de alto nivel (como los componentes de presentación) no deben depender directamente de detalles específicos (como la forma en que se obtienen los datos), sino que deben depender de abstracciones (como hooks personalizados o servicios) que puedan ser fácilmente reemplazados o modificados sin afectar a los componentes de alto nivel.
+
+*index.tsx*: Componente principal que utiliza un hook personalizado para obtener datos, permitiendo cambiar la fuente de datos sin modificar el componente.
+
 ```tsx
 import { useData } from './hooks/useData'
 import type { TodoType } from './types/todos.d'
@@ -353,7 +396,8 @@ export default function DependencyInversion() {
 }
 ```
 
-types/todos.d.ts
+*types/todos.d.ts*: Define el tipo de dato.
+
 ```ts
 export type TodoType = {
   id: number
@@ -363,12 +407,14 @@ export type TodoType = {
 }
 ```
 
-constants/todos.ts
+*constants/todos.ts*: Define la constante con la URL de la API.
+
 ```ts
 export const TODOS_API_URL = 'https://jsonplaceholder.typicode.com/todos'
 ```
 
-utils/fetchers.ts
+*utils/fetchers.ts*: Define diferentes fetchers para obtener datos desde distintas fuentes (API, localStorage, mocks).
+
 ```ts
 import { TODOS_API_URL } from '../constants/todos'
 
@@ -401,7 +447,8 @@ export const fetcherFromMocks = async function<T>(): Promise<T> {
 }
 ```
 
-hooks/useData.ts
+*hooks/useData.ts*: Hook personalizado que utiliza SWR para obtener datos, dependiendo de la abstracción del fetcher proporcionado.
+
 ```ts
 import useSWR from 'swr'
 
