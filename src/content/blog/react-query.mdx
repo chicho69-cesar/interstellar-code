@@ -8,3 +8,271 @@ isDraft: false
 ---
 
 # Uso de TanStack React Query
+
+TanStack React Query es una librería para la gestión de datos asíncronos en aplicaciones web, esta librería tiene opciones para ser utilizada en multiples frameworks y librerías, pero donde más ha destacado es en su uso con aplicaciones de React, ya que nos permite manejar el estado de los datos obtenidos de forma asíncrona de una manera sencilla y eficiente, abstrae muchos de los conceptos complejos que conlleva el manejo de datos asíncronos como el cache, revalidaciones, mutaciones, etc.
+
+Para comenzar a utilizar esta librería, primero debemos instalarla en nuestro proyecto:
+
+```bash
+npm install @tanstack/react-query
+```
+
+También es recomendado si estamos trabajando con algún linter para el código como por ejemplo ESLint, instalar el plugin oficial para React Query:
+
+```bash
+npm install -D @tanstack/eslint-plugin-query
+```
+
+Además de esto también podemos instalar el paquete de Devtools para React Query, que nos permitirá visualizar el estado de nuestras queries y mutations en tiempo real, lo cual es muy útil para el desarrollo y debugging de nuestra aplicación:
+
+```bash
+npm install @tanstack/react-query-devtools
+```
+
+Una vez que ya hemos instalado la librería, lo primero que debemos hacer es configurar el `QueryClient` y el `QueryClientProvider` en la raíz de nuestra aplicación, esto nos permitirá utilizar React Query en cualquier parte de nuestra aplicación:
+
+```tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+const client = new QueryClient()
+
+function App() {
+  return (
+    <QueryClientProvider client={client}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+```
+
+
+<br />
+## Queries
+
+Las queries son la forma principal de obtener datos usando React Query, para crear una query debemos utilizar el hook `useQuery`, este hook recibe un objeto con dos propiedades principales, una clave única para la query y una función que retorna una promesa con los datos que queremos obtener. Además de estas dos propiedades, el hook `useQuery` también acepta otras opciones para configurar el comportamiento de la query, como por ejemplo el tiempo de cache, revalidaciones, etc. Cuando usamos el hook `useQuery`, este nos retorna un objeto con varias propiedades que nos permiten manejar el estado de la query, como por ejemplo `data`, `error`, `isLoading`, etc.
+
+Un ejemplo del uso completo que podemos hacer con una query es el siguiente, donde vamos a obtener una lista de productos en un panel administrativo:
+
+```tsx
+import { useQuery } from '@tanstack/react-query'
+
+function Products() {
+  const {
+    data,
+    error,
+    isPending,
+    isError,
+    isLoading,
+    isSuccess,
+  } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const response = await fetch('/api/products')
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      return response.json()
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes -> Tiempo que los datos se consideran frescos antes de ser revalidados
+    cacheTime: 1000 * 60 * 10, // 10 minutes -> Tiempo que los datos se mantienen en cache después de que la query ya no está en uso
+    refetchOnWindowFocus: false, // No revalidar al enfocar la ventana
+    retry: 5, // Reintentar 5 veces en caso de error
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff para los reintentos
+  })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+
+  return (
+    <ul>
+      {data.map((product) => (
+        <li key={product.id}>{product.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+### Query Keys
+
+Las query keys son una parte fundamental de React Query, ya que nos permiten identificar de manera única cada query en nuestra aplicación. Una query key puede ser un array de valores donde es importante tener al menos un valor para identificar la query, pero podemos usar tantos elementos como necesitemos lo cual nos permite crear keys más complejas y específicas, además de que no solo podemos usar strings para identificar las queries, sino que podemos usar todo tipo de datos como números, arreglos, objetos, etc. Lo que necesitemos para identificar la query. Es importante que las query keys sean únicas para cada query, ya que React Query utiliza estas keys para almacenar y gestionar el estado de las queries en su cache. Por ejemplo, si tenemos una query para obtener los detalles de un producto específico, podemos usar un array como query key que incluya el ID del producto:
+
+```tsx
+const { data } = useQuery({
+  queryKey: ['product', productId],
+  queryFn: async () => {
+    const response = await fetch(`/api/products/${productId}`)
+    return response.json()
+  },
+})
+```
+
+### Query Functions
+
+Las query functions son las funciones que utilizamos para obtener los datos en nuestras queries, estas funciones deben retornar una promesa que resuelva con los datos que queremos obtener. Las query functions pueden ser funciones asíncronas o funciones que retornen una promesa de manera explícita. Es importante manejar los errores dentro de las query functions, ya que si la promesa es rechazada, React Query considerará que la query ha fallado y actualizará el estado de la query en consecuencia. 
+Es importante, recalcar que las query functions su objetivo es regresar la data con la cual vamos a trabajar en React Query, sin importar de donde provenga, ya sea de una petición http, una petición graphql, del localStorage, etc.
+Además también, las query functions reciben un objeto como parámetro que contiene información útil sobre la query, como por ejemplo la query key, el page param en caso de que estemos trabajando con paginación, etc.
+Un ejemplo de una query function que maneja errores podría ser el siguiente:
+
+```tsx
+const fetchProduct = async (productId) => {
+  const response = await fetch(`/api/products/${productId}`)
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok')
+  }
+
+  return response.json()
+}
+
+const { data } = useQuery({
+  queryKey: ['product', productId],
+  queryFn: ({ queryKey  }) => fetchProduct(queryKey[1]),
+})
+```
+
+### Parallel Queries
+
+Cuando nosotros usamos multiples queries en un mismo componente o hook de React, estas se ejecutan de manera paralela, es decir, todas las queries se inician al mismo tiempo y no esperan a que una termine para iniciar la siguiente, esto es muy útil cuando necesitamos obtener varios datos al mismo tiempo y no dependen unos de otros. Un ejemplo de uso de parallel queries podría ser el siguiente, donde obtenemos una lista de productos y una lista de categorías al mismo tiempo. Dentro de estos casos existe un caso en particular y es cuando necesitas hacer multiples queries, que usan la misma función y solo cambia por ejemplo un parámetro, supongamos que tenemos una función una función que obtiene los productos de una categoría específica, y queremos obtener los productos de varias categorías al mismo tiempo, en este caso podemos usar el hook `useQueries`, que nos permite ejecutar multiples queries de manera paralela, pasando un array de objetos de configuración para cada query:
+
+```tsx
+import { useQueries } from '@tanstack/react-query'
+
+function ProductsByCategories({ categories }) {
+  const queries = useQueries({
+    queries: categories.map(({ id }) => ({
+      queryKey: ['products', id],
+      queryFn: async () => {
+        const response = await fetch(`/api/categories/${id}/products`)
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+
+        return response.json()
+      },
+    })),
+  })
+
+  if (queries.some((query) => query.isLoading)) {
+    return <div>Loading...</div>
+  }
+
+  if (queries.some((query) => query.isError)) {
+    return <div>Error loading products</div>
+  }
+
+  return (
+    <div>
+      {queries.map((query, index) => (
+        <div key={categories[index]}>
+          <h2>Category {categories[index].name}</h2>
+          
+          <ul>
+            {query.data.map((product) => (
+              <li key={product.id}>{product.name}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Dependent Queries
+
+Las dependent queries son queries que dependen del resultado de otra query para poder ejecutarse, es decir, una query no se ejecuta hasta que otra query haya terminado y haya proporcionado los datos necesarios. Esto es útil cuando necesitamos obtener datos que dependen de otros datos, por ejemplo, si queremos obtener los comentarios de un producto, después de haber obtenido los detalles del mismo. Para manejar dependent queries en React Query, podemos usar la opción `enabled` en el hook `useQuery`, esta opción nos permite controlar si una query debe ejecutarse o no, basándonos en alguna condición. Un ejemplo de uso de dependent queries podría ser el siguiente:
+
+```tsx
+const { data: product } = useQuery({
+  queryKey: ['product', productId],
+  queryFn: () => fetchProduct(productId),
+})
+
+const { data: reviews } = useQuery({
+  queryKey: ['reviews', productId],
+  queryFn: () => fetchReviews(productId),
+  enabled: !!product, // La query de reviews solo se ejecuta si product tiene un valor
+})
+```
+
+### Paginated Queries
+
+Aunque la paginación en React Query es algo que se suele trabajar más con lo que son las Infinite Queries, también podemos manejar la paginación de una manera más tradicional usando queries normales, para esto podemos usar el hook `useQuery` y manejar el estado de la página nosotros mismos, pasando el número de página como parte de la query key y usando este valor en la query function para obtener los datos correspondientes a esa página. Un ejemplo de uso de paginated queries podría ser el siguiente:
+
+```tsx
+function PaginatedProducts() {
+  const [page, setPage] = useState(1)
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['products', page],
+    queryFn: ({ queryKey }) => 
+      fetch(`/api/products?page=${queryKey[1]}`).then((res) => res.json()),
+    keepPreviousData: true, // Mantener los datos anteriores mientras se carga la nueva página
+  })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (isError) {
+    return <div>Error loading products</div>
+  }
+
+  return (
+    <div>
+      <ul>
+        {data.products.map((product) => (
+          <li key={product.id}>{product.name}</li>
+        ))}
+      </ul>
+
+      <button
+        onClick={() => setPage((old) => Math.max(old - 1, 1))}
+        disabled={page === 1}
+      >
+        Previous
+      </button>
+      
+      <button
+        onClick={() => setPage((old) => (!data.hasMore ? old : old + 1))}
+        disabled={!data.hasMore}
+      >
+        Next
+      </button>
+    </div>
+  )
+}
+```
+
+
+<br />
+## Infinite Queries
+
+
+<br />
+## Queries avanzadas
+
+**Prefetch de data**
+
+
+<br />
+## Mutations
+
+
+<br />
+## Mutations avanzadas
+
+
+<br />
+## Caching y temas avanzados
