@@ -436,3 +436,34 @@ const mutation = useMutation({
   },
 })
 ```
+
+
+<br />
+## Caching y temas avanzados
+
+Cuando trabajamos con React Query, el manejo del cache es uno de los aspectos más importantes y poderosos de la librería. React Query almacena en cache los datos obtenidos por las queries, lo que nos permite evitar peticiones innecesarias y mejorar el rendimiento de nuestra aplicación. Podemos configurar el comportamiento del cache a través de varias opciones disponibles en el hook `useQuery`, como `staleTime`, `cacheTime`, `refetchOnWindowFocus`, entre otras.
+
+### Prefetching Queries
+
+El prefetching de queries es una técnica que nos permite cargar datos en cache antes de que sean necesarios en la UI, lo que puede mejorar significativamente la experiencia del usuario al reducir los tiempos de espera. React Query nos proporciona el método `prefetchQuery` a través del `QueryClient`, que podemos usar para cargar datos en cache de manera anticipada. Un ejemplo de uso de prefetching podría ser el siguiente, donde pre cargamos los detalles de un producto cuando el usuario pasa el cursor sobre un enlace:
+
+```tsx
+import { useQueryClient } from '@tanstack/react-query'
+
+function ProductLink({ productId, children }) {
+  const queryClient = useQueryClient()
+
+  const handleMouseEnter = () => {
+    queryClient.prefetchQuery({
+      queryKey: ['product', productId],
+      queryFn: () => fetchProduct(productId),
+    })
+  }
+
+  return (
+    <a href={`/products/${productId}`} onMouseEnter={handleMouseEnter}>
+      {children}
+    </a>
+  )
+}
+```
