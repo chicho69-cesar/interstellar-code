@@ -243,7 +243,7 @@ function PaginatedProducts() {
       >
         Previous
       </button>
-      
+
       <button
         onClick={() => setPage((old) => (!data.hasMore ? old : old + 1))}
         disabled={!data.hasMore}
@@ -255,24 +255,184 @@ function PaginatedProducts() {
 }
 ```
 
+### Infinite Queries
 
-<br />
-## Infinite Queries
+Las infinite queries son una forma de manejar la paginación de datos de manera más dinámica, permitiéndonos cargar más datos a medida que el usuario los necesita, en lugar de cargar todos los datos de una sola vez o tener que navegar entre páginas. Para manejar infinite queries en React Query, podemos usar el hook `useInfiniteQuery`, este hook nos permite definir una query function que recibe un parámetro especial llamado `pageParam`, el cual podemos usar para obtener la siguiente página de datos. Además, el hook `useInfiniteQuery` nos proporciona un método llamado `fetchNextPage`, que podemos usar para cargar la siguiente página de datos cuando sea necesario. Un ejemplo de uso de infinite queries podría ser el siguiente:
 
+```tsx
+import { useInfiniteQuery } from '@tanstack/react-query'
 
-<br />
-## Queries avanzadas
+function InfiniteProducts() {
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['products'],
+    queryFn: ({ pageParam = 1 }) => fetch(`/api/products?page=${pageParam}`).then((res) => res.json()),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.hasMore) {
+        return pages.length + 1 // Siguiente página
+      }
 
-**Prefetch de data**
+      return undefined // No hay más páginas
+    },
+  })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (isError) {
+    return <div>Error loading products</div>
+  }
+
+  return (
+    <div>
+      {data.pages.map((page, pageIndex) => (
+        <div key={pageIndex}>
+          <ul>
+            {page.products.map((product) => (
+              <li key={product.id}>{product.name}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      <button
+        onClick={() => fetchNextPage()}
+        disabled={!hasNextPage || isFetchingNextPage}
+      >
+        {isFetchingNextPage
+          ? 'Loading more...'
+          : hasNextPage
+          ? 'Load More'
+          : 'No more products'}
+      </button>
+    </div>
+  )
+}
+```
 
 
 <br />
 ## Mutations
 
+Las mutaciones a diferencia de las queries, no son para obtener datos, sino para modificarlos, ya sea creando, actualizando o eliminando datos. Para manejar mutaciones en React Query, podemos usar el hook `useMutation`, este hook nos permite definir una función que realiza la mutación y nos proporciona métodos para ejecutar la mutación y manejar su estado. Un ejemplo de uso de mutaciones podría ser el siguiente, donde creamos un nuevo producto:
 
-<br />
-## Mutations avanzadas
+```tsx
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+function CreateProduct() {
+  const queryClient = useQueryClient()
 
-<br />
-## Caching y temas avanzados
+  const mutation = useMutation({
+    mutationKey: ['createProduct'],
+    mutationFn: async (newProduct) => {
+      // Función para crear un nuevo producto
+      await addProduct(newProduct)
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: (error) => {
+      console.error('Error creating product:', error)
+    },
+    onSettled: () => {
+      console.log('Mutation settled')
+    },
+  })
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    const form = new FormData(event.target)
+    const name = form.get('name') as string
+    const price = parseFloat(form.get('price') as string)
+
+    const newProduct = { name, price }
+    mutation.mutate(newProduct)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="name" placeholder="Product Name" required />
+      <input name="price" type="number" step="0.01" placeholder="Price" required />
+
+      <button type="submit">Create Product</button>
+
+      {mutation.isLoading && <p>Creating product...</p>}
+      {mutation.isError && <p>Error creating product</p>}
+      {mutation.isSuccess && <p>Product created!</p>}
+    </form>
+  )
+}
+```
+
+### Query Invalidation
+
+Como lo vimos en el ejemplo anterior, una de las cosas más comunes que hacemos después de una mutación es invalidar las queries relacionadas para asegurarnos de que los datos en la UI estén actualizados. React Query nos proporciona el método `invalidateQueries` a través del `QueryClient`, que podemos usar en los callbacks de la mutación como `onSuccess`, `onError` o `onSettled`. Al invalidar una query, React Query marcará esa query como desactualizada y la volverá a ejecutar la próxima vez que se necesite, obteniendo así los datos más recientes. Esto es especialmente útil cuando una mutación afecta a los datos que ya hemos obtenido con una query, como en el caso de crear, actualizar o eliminar un recurso.
+
+### Mutation Responses
+
+Si queremos actualizar la data de algún recurso una vez que hemos echo una mutación no solo podemos hacerlo invalidando las queries relacionadas, sino que también podemos usar la respuesta de la mutación para actualizar directamente la cache de React Query. Esto es útil cuando la respuesta de la mutación contiene los datos actualizados que queremos reflejar en la UI sin necesidad de hacer una nueva petición para obtenerlos. Para hacer esto, podemos usar el método `setQueryData` del `QueryClient`, que nos permite actualizar los datos almacenados en la cache para una query específica. Un ejemplo de esto podría ser el siguiente, donde actualizamos un producto y usamos la respuesta de la mutación para actualizar directamente la cache:
+
+```tsx
+const mutation = useMutation({
+  mutationKey: ['updateProduct'],
+  mutationFn: async (updatedProduct) => {
+    // Función para actualizar un producto
+    return await updateProduct(updatedProduct)
+  },
+  onSuccess: (data) => {
+    // Actualizar la cache directamente con la respuesta de la mutación
+    queryClient.setQueryData(['product', data.id], data)
+    queryClient.invalidateQueries({ queryKey: ['products'] }) // Opcionalmente invalidar la lista de productos
+  },
+})
+```
+
+### Optimistic Updates
+
+Las actualizaciones optimistas son una técnica que nos permite actualizar la UI inmediatamente después de iniciar una mutación, sin esperar a que la mutación se complete. Esto mejora la experiencia del usuario al hacer que la aplicación se sienta más rápida y responsiva. Para implementar actualizaciones optimistas en React Query, podemos usar el callback `onMutate` del hook `useMutation`. En este callback, podemos actualizar la cache de React Query para reflejar los cambios de manera inmediata. Además, es importante manejar el caso en que la mutación falle, para lo cual podemos usar el callback `onError` para revertir los cambios si es necesario. Un ejemplo de uso de actualizaciones optimistas podría ser el siguiente:
+
+```tsx
+const mutation = useMutation({
+  mutationKey: ['updateProduct'],
+  mutationFn: async (updatedProduct) => {
+    // Función para actualizar un producto
+    return await updateProduct(updatedProduct)
+  },
+  onMutate: async (newProduct) => {
+    // Cancelar cualquier query en curso para el producto
+    await queryClient.cancelQueries({ queryKey: ['product', newProduct.id] })
+
+    // Obtener el estado anterior del producto
+    const previousProduct = queryClient.getQueryData(['product', newProduct.id])
+
+    // Actualizar la cache de manera optimista
+    queryClient.setQueryData(['product', newProduct.id], (old) => ({
+      ...old,
+      ...newProduct,
+    }))
+
+    // Retornar el estado anterior para poder revertir lo en caso de error
+    return { previousProduct }
+  },
+  onError: (err, newProduct, context) => {
+    // Revertir los cambios en caso de error
+    if (context?.previousProduct) {
+      queryClient.setQueryData(['product', newProduct.id], context.previousProduct)
+    }
+  },
+  onSettled: () => {
+    // Invalidar la query para asegurarnos de que los datos estén actualizados
+    queryClient.invalidateQueries({ queryKey: ['products'] })
+  },
+})
+```
