@@ -1,11 +1,48 @@
 ---
 title: Construir un Dockerfile para Node.js
 description: Aprende a crear un Dockerfile para una aplicación Node.js, incluyendo la configuración del entorno y la optimización de la imagen.
-date: 2025-06-02
-tags: [Docker, Node]
+date: 2025-09-01
+tags: [Docker, Node, Express]
 slug: build-a-dockerfile-for-node
-isDraft: true
+isDraft: false
 ---
 
 # Construir un Dockerfile para Node.js
 
+Para crear un Dockerfile para una aplicación hecha con Node.js y quizá el framework de Express, una forma simple de crearlo es la siguiente, donde creamos una imagen en base a la imagen oficial de Node.js, copiamos los archivos necesarios, instalamos las dependencias y exponemos el puerto en el que correrá la aplicación.
+
+```Dockerfile
+FROM node:19-alpine3.15 as installer
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+
+FROM node:19-alpine3.15 as builder
+WORKDIR /app
+COPY --from=installer /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+FROM node:19-alpine3.15 as runner
+EXPOSE 3000
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
+CMD ["node", "dist/app.js"]
+```
+
+En esta configuración:
+
+1. **Etapa de Instalación**: Usamos una imagen base ligera de Node.js (`node:19-alpine3.15`) y copiamos los archivos `package.json` y `package-lock.json` para instalar las dependencias con `npm install`. Esto asegura que las dependencias se instalen en una capa separada, lo que puede ayudar a aprovechar la caché de Docker.
+2. **Etapa de Construcción**: En esta etapa, copiamos las dependencias instaladas desde la etapa anterior y el resto del código fuente de la aplicación. Luego, ejecutamos `npm run build` para compilar el proyecto (esto es especialmente útil si estás usando TypeScript o algún otro pre procesador).
+3. **Etapa de Ejecución**: Finalmente, en la etapa de ejecución, exponemos el puerto 3000 (o el puerto que tu aplicación use), copiamos los archivos compilados y las dependencias necesarias, y definimos el comando para iniciar la aplicación.
+
+Este enfoque de múltiples etapas ayuda a mantener la imagen final lo más pequeña posible, ya que solo incluye los archivos necesarios para ejecutar la aplicación.
+
+Para construir y correr la imagen, puedes usar los siguientes comandos:
+
+```bash
+docker build -t my-node-app .
+docker run -p 3000:3000 my-node-app
+```
