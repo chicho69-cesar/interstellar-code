@@ -1,11 +1,138 @@
 ---
 title: Inicializar un servidor Express con TypeScript
 description: Aprende a configurar un servidor Express utilizando TypeScript, incluyendo la estructura de carpetas y la configuración del entorno.
-date: 2025-06-02
+date: 2025-09-01
 tags: [Express, TypeScript, Node]
 slug: initialize-express-server-with-typescript
-isDraft: true
+isDraft: false
 ---
 
 # Inicializar un servidor Express con TypeScript
 
+Para poder iniciar un servidor de Express utilizando TypeScript podemos seguir una de las siguientes formas, donde podemos utilizar `ts-node`, o alguna otra alternativa como `esbuild` o `swc`.
+
+
+<br />
+## Opción 1: Usando `ts-node`
+
+**1.-** Instalar TypeScript y demás dependencias necesarias:
+
+```bash
+npm install typescript ts-node-dev @types/node rimraf
+```
+
+**2.-** Inicializar el archivo de configuración de TypeScript:
+
+```bash
+npx tsc --init --outDir dist/ --rootDir src
+```
+
+**3.-** Crear scripts para dev, build y start en el `package.json`:
+
+```json
+"scripts": {
+  "dev": "tsnd --respawn src/app.ts",
+  "build": "rimraf ./dist && tsc",
+  "start": "npm run build && node dist/app.js"
+}
+```
+
+
+<br />
+## Opción 2: Alternativa
+
+**1.-** Instalar TypeScript y tipos de Node, como dependencia de desarrollo.
+
+```bash
+npm i -D typescript @types/node
+```
+
+**2.-** Inicializar el archivo de configuración de TypeScript:
+
+```bash
+npx tsc --init --outDir dist/ --rootDir src
+```
+
+**3.-** Opcional - Para transpilar el código, se puede usar este comando.
+
+```bash
+npx tsc
+npx tsc --watch
+```
+
+**4.-** Configurar Nodemon y Node-TS.
+
+```bash
+npm i -D nodemon ts-node
+```
+
+**5.-** Crear archivo de configuración de Nodemon `nodemon.json` en la raíz del proyecto.
+
+```json
+{
+  "watch": ["src"],
+  "ext": ".ts,.js",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "npx ts-node ./src/app.ts"
+}
+```
+
+**6.-** Crear scripts para dev en el `package.json`:
+
+```json
+"scripts": {
+  "dev": "nodemon",
+}
+```
+
+**7.-** Instalar rimraf (Herramienta que funciona similar al rm -f) para eliminar la carpeta dist.
+
+```bash
+npm i -D rimraf
+```
+
+**8.-** Crear script para build y start en el `package.json`:
+
+```json
+"scripts": {
+  "build": "rimraf ./dist && tsc",
+  "start": "npm run build && node dist/app.js"
+}
+```
+
+
+<br />
+## Opción 3: Alternativa simplificada
+
+**1.-** Instalar TypeScript y tipos de Node, como dependencia de desarrollo.
+
+```bash
+npm i -D typescript @types/node ts-node nodemon rimraf
+```
+
+**2.-** Inicializar el archivo de configuración de TypeScript:
+
+```bash
+npx tsc --init --outDir dist/ --rootDir src
+```
+
+**3.-** Crear archivo de configuración de Nodemon `nodemon.json` en la raíz del proyecto.
+
+```json
+{
+  "watch": ["src"],
+  "ext": ".ts,.js",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "npx ts-node ./src/app.ts"
+}
+```
+
+**4.-** Crear scripts para dev, build y start en el `package.json`:
+
+```json
+"scripts": {
+  "dev": "nodemon",
+  "build": "rimraf ./dist && tsc",
+  "start": "npm run build && node dist/app.js"
+}
+```
