@@ -1,11 +1,178 @@
 ---
 title: Inicializar un servidor Express
 description: Aprende a configurar un servidor Express utilizando JavaScript.
-date: 2025-06-03
+date: 2025-09-01
 tags: [Express, Node, JavaScript]
 slug: initialize-express-server
-isDraft: true
+isDraft: false
 ---
 
 # Inicializar un servidor Express
 
+Express es un framework minimalista para Node.js que facilita la creación de aplicaciones web y APIs. En este artículo vamos a ver como se puede inicializar un servidor de Express desde cero utilizando JavaScript.
+Antes de comenzar es importante tener una carpeta con el proyecto donde vamos a trabajar, y además tener Node.js instalado en el sistema, una vez que cumplimos con estos requisitos podemos proceder a inicializar el proyecto.
+
+
+<br />
+## Paso 1: Inicializar el proyecto
+
+Primero, abrimos una terminal y navegamos a la carpeta del proyecto. Luego, ejecutamos el siguiente comando para inicializar un nuevo proyecto de Node.js:
+
+```bash
+npm init -y
+```
+
+Este comando crea un archivo `package.json` con la configuración predeterminada. Además de tener en cuenta que el proyecto por defecto estará configurado para trabajar con CommonJS, si queremos trabajar con ES Modules debemos agregar el siguiente campo en el `package.json`:
+
+```json
+"type": "module"
+```
+
+
+<br />
+## Paso 2: Instalar Librerías Necesarias
+
+Las principales librerías que nos van a ayudar a crear un servidor de Express con funcionalidades básicas como manejo de rutas HTTP, conexión a base de datos como MongoDB, manejo de variables de entorno son, conexión con Websockets, entre algunas otras son:
+
+- **express**: El framework principal para crear el servidor.
+- **mongoose**: Librería para interactuar con MongoDB.
+- **dotenv**: Para manejar variables de entorno.
+- **cors**: Middleware para habilitar CORS (Cross-Origin Resource Sharing).
+- **bcryptjs**: Para hashear contraseñas.
+- **jsonwebtoken**: Para manejar autenticación basada en tokens.
+- **socket.io**: Para manejar conexiones WebSocket.
+- **morgan**: Middleware para registrar solicitudes HTTP.
+- **express-fileupload**: Middleware para manejar la subida de archivos.
+- **express-validator**: Middleware para validar y sanitizar datos de entrada.
+
+
+<br />
+### Estructura de Carpetas
+
+Una estructura de carpetas recomendada para un proyecto de Express utilizando una arquitectura MVC podría ser la siguiente:
+
+```txt
+my-express-app/
+├── node_modules/
+├── src/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middlewares/
+│   ├── config/
+│   ├── utils/
+│   ├── app.js
+│   └── server.js
+├── .env
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+
+<br />
+### Definición de archivos principales
+
+- **app.js**: Aquí inicializa una instancia de Server y se manda llamar el método `listen` para que el servidor escuche en un puerto específico.
+- **server.js**: Aquí se configura la aplicación de Express, se agregan middlewares, rutas y se exporta la aplicación para ser utilizada en `app.js`.
+- **controllers/**: Contiene la lógica de negocio para manejar las solicitudes y respuestas.
+- **models/**: Define los esquemas y modelos de datos para interactuar con la base de datos.
+- **routes/**: Define las rutas de la aplicación y las asocia con los controladores correspondientes.
+- **middlewares/**: Contiene middlewares personalizados para manejar tareas como autenticación, validación, etc.
+- **config/**: Contiene archivos de configuración, como la configuración de la base de datos.
+- **utils/**: Contiene funciones utilitarias que pueden ser reutilizadas en diferentes partes de la aplicación.
+
+
+<br />
+### Ejemplo de Código
+
+A continuación, se muestra un ejemplo básico de cómo podrían verse los archivos `app.js` y `server.js`:
+
+**src/app.js**
+```javascript
+import Server from './server.js';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const server = new Server();
+server.listen();
+```
+
+**src/server.js**
+```javascript
+import { createServer } from 'node:http';
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import fileUpload from 'express-fileupload';
+import { Server as SocketIOServer } from 'socket.io';
+import { dbConnection } from './config/db.js';
+import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import { socketController } from './sockets/socketController.js';
+
+export class Server {
+  constructor() {
+    this.app = express();
+    this.port = process.env.PORT || 3000;
+    this.server = createServer(this.app);
+    this.io = new SocketIOServer(this.server, {
+      cors: {
+        origin: '*',
+      },
+    });
+
+    // Conectar a la base de datos
+    dbConnection();
+
+    // Middlewares
+    this.middlewares();
+
+    // Rutas de la aplicación
+    this.routes();
+
+    // Configuración de sockets
+    this.sockets();
+  }
+
+  middlewares() {
+    // Habilitar CORS
+    this.app.use(cors());
+
+    // Parseo y lectura del body
+    this.app.use(express.json());
+
+    // Middleware para logging
+    this.app.use(morgan('dev'));
+
+    // Middleware para manejo de archivos
+    this.app.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: '/tmp/',
+        createParentPath: true,
+      })
+    );
+
+    // Directorio público
+    this.app.use(express.static('public'));
+  }
+
+  routes() {
+    this.app.use('/api/users', userRoutes);
+    this.app.use('/api/auth', authRoutes);
+  }
+
+  sockets() {
+    this.io.on('connection', (socket) => socketController(socket, this.io));
+  }
+
+  listen() {
+    this.server.listen(this.port, () => {
+      console.log(`Servidor corriendo en http://localhost:${this.port}`);
+    });
+  }
+}
+```
+
+Este código configura un servidor Express con middlewares comunes, rutas para usuarios y autenticación, y soporte para WebSockets utilizando Socket.IO. Además, se conecta a una base de datos MongoDB utilizando Mongoose.
