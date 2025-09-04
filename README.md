@@ -1,4 +1,4 @@
-# Interstellar Code
+# Interstellar Code - Blog de Desarrollo Web y Tecnología
 
 <div style="width: 100%; display: flex; justify-content: center; margin-block: 1rem;">
   <img src="./assets/favicon.svg" width="100" height="100" />
