@@ -1,4 +1,4 @@
-# Interstellar Code - Blog de Desarrollo Web y Tecnología
+# Interstellar Code
 
 <div style="width: 100%; display: flex; justify-content: center; margin-block: 1rem;">
   <img src="./assets/favicon.svg" width="100" height="100" />
@@ -13,9 +13,11 @@
 ## 📸 Capturas de pantalla
 
 ### 🖥️ Página principal
+
 ![Home Page](assets/home.png)
 
 ### 📄 Página de artículo
+
 ![Post Page](assets/post.png)
 
 ---
@@ -33,12 +35,12 @@
 
 ## 🛠️ Tecnologías utilizadas
 
-| Tecnología | Descripción |
-|------------|-------------|
-| [Astro](https://astro.build/) | Framework moderno para sitios rápidos y estáticos. |
-| [Markdown/MDX](https://mdxjs.com/) | Para escribir los artículos. |
-| [Netlify](https://www.netlify.com/) | Hosting y despliegue continuo. |
-| [Tailwind CSS](https://tailwindcss.com/) | Para estilos rápidos y personalizables. |
+| Tecnología                               | Descripción                                        |
+| ---------------------------------------- | -------------------------------------------------- |
+| [Astro](https://astro.build/)            | Framework moderno para sitios rápidos y estáticos. |
+| [Markdown/MDX](https://mdxjs.com/)       | Para escribir los artículos.                       |
+| [Netlify](https://www.netlify.com/)      | Hosting y despliegue continuo.                     |
+| [Tailwind CSS](https://tailwindcss.com/) | Para estilos rápidos y personalizables.            |
 
 ---
 
