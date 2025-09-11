@@ -13,9 +13,11 @@
 ## 📸 Capturas de pantalla
 
 ### 🖥️ Página principal
+
 ![Home Page](assets/home.png)
 
 ### 📄 Página de artículo
+
 ![Post Page](assets/post.png)
 
 ---
@@ -33,12 +35,12 @@
 
 ## 🛠️ Tecnologías utilizadas
 
-| Tecnología | Descripción |
-|------------|-------------|
-| [Astro](https://astro.build/) | Framework moderno para sitios rápidos y estáticos. |
-| [Markdown/MDX](https://mdxjs.com/) | Para escribir los artículos. |
-| [Netlify](https://www.netlify.com/) | Hosting y despliegue continuo. |
-| [Tailwind CSS](https://tailwindcss.com/) | Para estilos rápidos y personalizables. |
+| Tecnología                               | Descripción                                        |
+| ---------------------------------------- | -------------------------------------------------- |
+| [Astro](https://astro.build/)            | Framework moderno para sitios rápidos y estáticos. |
+| [Markdown/MDX](https://mdxjs.com/)       | Para escribir los artículos.                       |
+| [Netlify](https://www.netlify.com/)      | Hosting y despliegue continuo.                     |
+| [Tailwind CSS](https://tailwindcss.com/) | Para estilos rápidos y personalizables.            |
 
 ---
 
