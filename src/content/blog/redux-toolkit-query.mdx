@@ -9,15 +9,116 @@ isDraft: false
 
 # Guía de Redux Toolkit Query
 
+Redux Toolkit Query (RTK Query) es una poderosa herramienta para la gestión de datos asíncronos en aplicaciones React. Proporciona una forma sencilla y eficiente de manejar la obtención, almacenamiento en caché y sincronización de datos, mejorando el rendimiento y la experiencia del usuario.
+
+Esta herramienta está incluida en la librería de Redux Toolkit, lo que facilita su integración con Redux y permite aprovechar las ventajas de ambas tecnologías, permitiendo gestionar el estado global de la aplicación y los datos asíncronos de manera coherente y eficiente.
+
+Para poder trabajar con esta herramienta lo primero y más importante es tener instaladas las dependencias necesarias en nuestro proyecto, para ello debemos de instalar `@reduxjs/toolkit` y `react-redux` si no las tenemos ya instaladas:
+
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
 
 <br />
 ## Configuración de RTK Query
+
+Para poder utilizar RTK Query en nuestra aplicación, lo primero que debemos hacer es configurar un "API Slice". Un API Slice es una pieza de código que define cómo interactuar con una API específica, incluyendo las consultas (queries) y mutaciones (mutations) que se pueden realizar.
+
+Para crear un API Slice, podemos utilizar la función `createApi` proporcionada por RTK Query. Aquí hay un ejemplo básico de cómo configurar un API Slice:
+
+```typescript
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { Post } from './types';
+
+export const apiPosts = createApi({
+  reducerPath: 'postsApi',
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'http://localhost:3000/'
+  }),
+  endpoints: (builder) => ({
+    getPosts: builder.query<Post[], void>({
+      query: () => 'posts',
+    }),
+    getPostById: builder.query<Post, number>({
+      query: (id) => `posts/${id}`,
+    }),
+    createPost: builder.mutation<Post, Partial<Post>>({
+      query: (body) => ({
+        url: 'posts',
+        method: 'POST',
+        body,
+      }),
+    }),
+    updatePost: builder.mutation<Post, Partial<Post> & Pick<Post, 'id'>>({
+      query: ({ id, ...body }) => ({
+        url: `posts/${id}`,
+        method: 'PUT',
+        body,
+      }),
+    }),
+    deletePost: builder.mutation<{ success: boolean; id: number }, number>({
+      query: (id) => ({
+        url: `posts/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+  }),
+});
+
+export const {
+  useGetPostsQuery,
+  useGetPostByIdQuery,
+  useCreatePostMutation,
+  useUpdatePostMutation,
+  useDeletePostMutation,
+} = apiPosts;
+```
+
+Una vez que tenemos nuestra API Slice configurada, debemos integrarla en nuestro store de Redux. Para ello, necesitamos añadir el reducer del API Slice y el middleware proporcionado por RTK Query:
+
+```typescript
+import { configureStore } from '@reduxjs/toolkit';
+import { apiPosts } from './apiPosts';
+
+export const store = configureStore({
+  reducer: {
+    [apiPosts.reducerPath]: apiPosts.reducer,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+    .concat(apiPosts.middleware),
+});
+```
+
+Por último, debemos envolver nuestra aplicación con el proveedor de Redux para que los componentes puedan acceder al store:
+
+```typescript
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
+
+import { store } from './store'
+import { App } from './App'
+
+const rootItem = document.getElementById('root')
+const root = createRoot(rootItem)
+
+root.render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>,
+);
+```
 
 
 <br />
 ## Uso Standard de RTK Query
 
 ### Queries
+
+### Infinite Queries
 
 ### Mutations
 
@@ -27,8 +128,14 @@ isDraft: false
 
 ### Paginación
 
+### Optimistic Updates
+
+### Polling
+
 
 <br />
 ## Temas avanzados de RTK Query
 
 ### Persistencia y rehidratación
+
+### Streaming y Code Splitting
